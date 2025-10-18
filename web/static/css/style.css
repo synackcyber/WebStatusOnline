@@ -1367,32 +1367,109 @@ input[type="checkbox"]:checked::before {
     box-shadow: 0 4px 12px var(--shadow);
 }
 
-/* Status: DOWN - Clean Red with subtle pulse for unacknowledged */
+/* Status: DOWN - Red Glow (static for acknowledged, pulsing for unacknowledged) */
 .compact-card.status-down {
     border-left-color: var(--danger);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        -3px 0 15px rgba(220, 38, 38, 0.4);
 }
 
-/* Subtle border pulse for unacknowledged down targets (professional, not flashy) */
+/* Smooth continuous pulsing for unacknowledged down targets */
 .compact-card.status-down:not(.acknowledged):not(.disabled) {
-    animation: subtleBorderPulse 3s ease-in-out infinite;
+    animation: dangerPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes subtleBorderPulse {
-    0%, 100% {
-        border-left-width: 2px;
-    }
-    50% {
-        border-left-width: 3px;
-    }
+/* Radial blast animation for down targets - emanates from center */
+.compact-card.status-down:not(.acknowledged):not(.disabled)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0%;
+    height: 0%;
+    background: radial-gradient(
+        circle,
+        rgba(220, 38, 38, 0.4) 0%,
+        rgba(220, 38, 38, 0.2) 30%,
+        transparent 70%
+    );
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: radialBlast 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    z-index: 0;
 }
 
-/* Remove radial blast effect */
-.compact-card.status-down::after {
+/* Acknowledged or disabled down targets stay calm - no pulsing */
+.compact-card.status-down.acknowledged,
+.compact-card.status-down.disabled {
+    animation: none;
+}
+
+.compact-card.status-down.acknowledged::after,
+.compact-card.status-down.disabled::after {
     display: none;
 }
 
+@keyframes dangerPulse {
+    0% {
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.2),
+            -3px 0 15px rgba(220, 38, 38, 0.4);
+    }
+    25% {
+        box-shadow:
+            0 2.5px 10px rgba(0, 0, 0, 0.25),
+            -4px 0 22px rgba(220, 38, 38, 0.5),
+            0 0 20px rgba(220, 38, 38, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 3px 12px rgba(0, 0, 0, 0.3),
+            -5px 0 30px rgba(220, 38, 38, 0.6),
+            0 0 40px rgba(220, 38, 38, 0.3);
+    }
+    75% {
+        box-shadow:
+            0 2.5px 10px rgba(0, 0, 0, 0.25),
+            -4px 0 22px rgba(220, 38, 38, 0.5),
+            0 0 20px rgba(220, 38, 38, 0.15);
+    }
+    100% {
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.2),
+            -3px 0 15px rgba(220, 38, 38, 0.4);
+    }
+}
+
+@keyframes radialBlast {
+    0% {
+        width: 0%;
+        height: 0%;
+        opacity: 0;
+    }
+    25% {
+        width: 80%;
+        height: 80%;
+        opacity: 0.6;
+    }
+    50% {
+        width: 150%;
+        height: 150%;
+        opacity: 0;
+    }
+    100% {
+        width: 150%;
+        height: 150%;
+        opacity: 0;
+    }
+}
+
 .compact-card.status-down:hover {
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        -5px 0 35px rgba(220, 38, 38, 0.6),
+        inset 0 0 20px rgba(220, 38, 38, 0.1);
 }
 
 /* Status: Unknown - Dim Gray */

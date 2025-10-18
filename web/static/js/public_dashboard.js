@@ -232,7 +232,7 @@ function renderOverallStatus(data) {
             icon: '!'
         },
         'major_outage': {
-            text: 'Major System Outage',
+            text: 'System Outage',
             class: 'down',
             icon: '×'
         },
