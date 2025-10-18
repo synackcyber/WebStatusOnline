@@ -1,102 +1,90 @@
 /*
  * Public Dashboard Styles
  * Read-only dashboard and timeline views for public status
- * Matching the main app's dark, geometric, cyberpunk aesthetic
+ * Clean professional design matching main app
  */
 
 /* ============================================================================
-   CSS Variables - Matching Main App
+   CSS Variables - Professional Theme
    ============================================================================ */
 
 :root {
     /* Dark theme colors (default) */
-    --bg-primary: #0a0e17;
-    --bg-secondary: #111827;
-    --bg-tertiary: #1a1f2e;
-    --bg-quaternary: #0f1419;
+    --bg-primary: #1a1f2e;
+    --bg-secondary: #252b3b;
+    --bg-tertiary: #2d3548;
+    --bg-elevated: #343b4f;
 
-    --text-primary: #e0e7ff;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-bright: #f8fafc;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-bright: #f9fafb;
 
     --border: rgba(255, 255, 255, 0.1);
     --border-light: rgba(255, 255, 255, 0.05);
+    --shadow: rgba(0, 0, 0, 0.2);
 
-    /* Status colors */
-    --success: #00ff41;
-    --success-glow: rgba(0, 255, 65, 0.3);
-    --danger: #ff0051;
-    --danger-glow: rgba(255, 0, 81, 0.3);
-    --warning: #ffa500;
-    --warning-glow: rgba(255, 165, 0, 0.3);
-    --info: #00f0ff;
-    --info-glow: rgba(0, 240, 255, 0.3);
-    --unknown: #888;
+    /* Status colors - muted professional */
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #2563eb;
+    --unknown: #6b7280;
 
     /* Primary accent */
-    --primary: #00f0ff;
-    --primary-glow: rgba(0, 240, 255, 0.3);
+    --primary: #2563eb;
 }
 
 /* Light mode - triggered by system preference or manual toggle */
 @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-        --bg-primary: #f8fafc;
-        --bg-secondary: #ffffff;
-        --bg-tertiary: #f1f5f9;
-        --bg-quaternary: #e2e8f0;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f9fafb;
+        --bg-tertiary: #f3f4f6;
+        --bg-elevated: #ffffff;
 
-        --text-primary: #1e293b;
-        --text-secondary: #475569;
-        --text-muted: #94a3b8;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
         --text-bright: #0f172a;
 
         --border: rgba(0, 0, 0, 0.1);
         --border-light: rgba(0, 0, 0, 0.05);
+        --shadow: rgba(0, 0, 0, 0.05);
 
-        --success: #00cc33;
-        --success-glow: rgba(0, 204, 51, 0.2);
+        --success: #059669;
         --danger: #dc2626;
-        --danger-glow: rgba(220, 38, 38, 0.2);
-        --warning: #f59e0b;
-        --warning-glow: rgba(245, 158, 11, 0.2);
-        --info: #0ea5e9;
-        --info-glow: rgba(14, 165, 233, 0.2);
-        --unknown: #64748b;
+        --warning: #d97706;
+        --info: #2563eb;
+        --unknown: #6b7280;
 
-        --primary: #0ea5e9;
-        --primary-glow: rgba(14, 165, 233, 0.2);
+        --primary: #2563eb;
     }
 }
 
 /* Manual light mode override */
 :root[data-theme="light"] {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f1f5f9;
-    --bg-quaternary: #e2e8f0;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --bg-elevated: #ffffff;
 
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
     --text-bright: #0f172a;
 
     --border: rgba(0, 0, 0, 0.1);
     --border-light: rgba(0, 0, 0, 0.05);
+    --shadow: rgba(0, 0, 0, 0.05);
 
-    --success: #00cc33;
-    --success-glow: rgba(0, 204, 51, 0.2);
+    --success: #059669;
     --danger: #dc2626;
-    --danger-glow: rgba(220, 38, 38, 0.2);
-    --warning: #f59e0b;
-    --warning-glow: rgba(245, 158, 11, 0.2);
-    --info: #0ea5e9;
-    --info-glow: rgba(14, 165, 233, 0.2);
-    --unknown: #64748b;
+    --warning: #d97706;
+    --info: #2563eb;
+    --unknown: #6b7280;
 
-    --primary: #0ea5e9;
-    --primary-glow: rgba(14, 165, 233, 0.2);
+    --primary: #2563eb;
 }
 
 /* ============================================================================
@@ -125,56 +113,10 @@ body {
     overflow-x: hidden;
 }
 
-/* Animated grid background */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridMove 20s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* Floating particles */
+/* Clean background - no effects */
+body::before,
 body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(0, 255, 65, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255, 0, 81, 0.05) 0%, transparent 50%);
-    animation: particleFloat 15s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-}
-
-@keyframes gridMove {
-    0% {
-        transform: translate(0, 0);
-    }
-    100% {
-        transform: translate(50px, 50px);
-    }
-}
-
-@keyframes particleFloat {
-    0%, 100% {
-        opacity: 0.3;
-    }
-    50% {
-        opacity: 0.5;
-    }
+    display: none;
 }
 
 /* ============================================================================

@@ -51,47 +51,39 @@ select,
    DARK MODE (DEFAULT)
    ======================================== */
 :root {
-    /* Dark Mode - Professional Palette */
-    --bg-primary: #0f1419;
-    --bg-secondary: #1a1f2e;
-    --bg-tertiary: #252b3b;
-    --bg-elevated: #2d3548;
-    --bg-glass: rgba(42, 48, 66, 0.7);
+    /* Dark Mode - Clean Professional Palette */
+    --bg-primary: #1a1f2e;
+    --bg-secondary: #252b3b;
+    --bg-tertiary: #2d3548;
+    --bg-elevated: #343b4f;
 
     /* Professional Accent Colors */
-    --accent-blue: #3b82f6;
-    --accent-blue-light: #60a5fa;
-    --accent-purple: #8b5cf6;
-    --accent-teal: #14b8a6;
+    --accent-blue: #2563eb;
+    --accent-blue-light: #3b82f6;
+    --accent-purple: #7c3aed;
+    --accent-teal: #0d9488;
 
-    /* Status Colors - Professional */
-    --success: #10b981;
-    --success-glow: rgba(16, 185, 129, 0.3);
-    --danger: #ef4444;
-    --danger-glow: rgba(239, 68, 68, 0.3);
-    --warning: #f59e0b;
-    --warning-glow: rgba(245, 158, 11, 0.3);
-    --info: #3b82f6;
-    --info-glow: rgba(59, 130, 246, 0.3);
+    /* Status Colors - Muted Professional */
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #2563eb;
     --unknown: #6b7280;
 
     /* Primary Accent */
-    --primary: #3b82f6;
-    --primary-glow: rgba(59, 130, 246, 0.4);
+    --primary: #2563eb;
 
     /* Text Colors */
-    --text-primary: #f3f4f6;
+    --text-primary: #e5e7eb;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
-    --text-bright: #ffffff;
+    --text-bright: #f9fafb;
 
     /* Borders & Effects */
-    --border: rgba(59, 130, 246, 0.15);
-    --border-light: rgba(59, 130, 246, 0.08);
-    --border-bright: rgba(59, 130, 246, 0.35);
-    --shadow: rgba(0, 0, 0, 0.5);
-    --glow: 0 0 30px var(--primary-glow);
-    --glass-backdrop: blur(12px);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-light: rgba(255, 255, 255, 0.05);
+    --border-bright: rgba(255, 255, 255, 0.2);
+    --shadow: rgba(0, 0, 0, 0.2);
 
     /* Interactive States */
     --hover-bg: rgba(59, 130, 246, 0.08);
@@ -103,51 +95,43 @@ select,
    LIGHT MODE
    ======================================== */
 body.light-mode {
-    /* Light Mode - Professional Palette */
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f1f5f9;
+    /* Light Mode - Clean Professional Palette */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
     --bg-elevated: #ffffff;
-    --bg-glass: rgba(255, 255, 255, 0.8);
 
-    /* Professional Accent Colors (same) */
-    --accent-blue: #3b82f6;
-    --accent-blue-light: #60a5fa;
-    --accent-purple: #8b5cf6;
-    --accent-teal: #14b8a6;
+    /* Professional Accent Colors */
+    --accent-blue: #2563eb;
+    --accent-blue-light: #3b82f6;
+    --accent-purple: #7c3aed;
+    --accent-teal: #0d9488;
 
-    /* Status Colors - Professional */
-    --success: #10b981;
-    --success-glow: rgba(16, 185, 129, 0.2);
-    --danger: #ef4444;
-    --danger-glow: rgba(239, 68, 68, 0.2);
-    --warning: #f59e0b;
-    --warning-glow: rgba(245, 158, 11, 0.2);
-    --info: #3b82f6;
-    --info-glow: rgba(59, 130, 246, 0.2);
+    /* Status Colors - Muted Professional */
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #2563eb;
     --unknown: #6b7280;
 
     /* Primary Accent */
-    --primary: #3b82f6;
-    --primary-glow: rgba(59, 130, 246, 0.3);
+    --primary: #2563eb;
 
     /* Text Colors */
-    --text-primary: #1f2937;
+    --text-primary: #111827;
     --text-secondary: #6b7280;
     --text-muted: #9ca3af;
     --text-bright: #0f172a;
 
     /* Borders & Effects */
-    --border: rgba(203, 213, 225, 0.8);
-    --border-light: rgba(203, 213, 225, 0.4);
-    --border-bright: rgba(59, 130, 246, 0.3);
-    --shadow: rgba(0, 0, 0, 0.08);
-    --glow: 0 0 20px var(--primary-glow);
-    --glass-backdrop: blur(12px);
+    --border: rgba(0, 0, 0, 0.1);
+    --border-light: rgba(0, 0, 0, 0.05);
+    --border-bright: rgba(0, 0, 0, 0.15);
+    --shadow: rgba(0, 0, 0, 0.05);
 
     /* Interactive States */
-    --hover-bg: rgba(59, 130, 246, 0.06);
-    --active-bg: rgba(59, 130, 246, 0.1);
+    --hover-bg: rgba(37, 99, 235, 0.04);
+    --active-bg: rgba(37, 99, 235, 0.08);
     --modal-overlay: rgba(0, 0, 0, 0.4);
 }
 
@@ -166,28 +150,9 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Subtle gradient overlay for depth */
-body::before {
-    content: '';
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-        ellipse at top,
-        var(--primary-glow),
-        transparent 60%
-    );
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.3;
-    transition: opacity 0.3s ease;
-}
-
-/* Remove old grid pattern */
+/* Clean background - no overlays or gradients */
+body::before,
 body::after {
-    content: '';
     display: none;
 }
 
@@ -1374,158 +1339,60 @@ input[type="checkbox"]:checked::before {
 .compact-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-left: 3px solid var(--border);
-    border-radius: 0;
-    padding: 18px;
+    border-left: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
     position: relative;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px var(--shadow);
 }
 
-/* Scanline effect on cards */
+/* Remove scanline effect */
 .compact-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        rgba(0, 240, 255, 0.03) 1px,
-        transparent 2px
-    );
-    pointer-events: none;
-    opacity: 0.5;
-}
-
-.compact-card:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    border-color: var(--primary);
-}
-
-/* Status: UP - Neon Green Glow */
-.compact-card.status-up {
-    border-left-color: var(--success);
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        -3px 0 15px var(--success-glow);
-}
-
-.compact-card.status-up:hover {
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        -5px 0 25px var(--success-glow),
-        inset 0 0 20px rgba(0, 255, 65, 0.1);
-}
-
-/* Status: DOWN - Red Glow (static for acknowledged, pulsing for unacknowledged) */
-.compact-card.status-down {
-    border-left-color: var(--danger);
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        -3px 0 15px var(--danger-glow);
-}
-
-/* Smooth continuous pulsing for unacknowledged down targets */
-.compact-card.status-down:not(.acknowledged):not(.disabled) {
-    animation: dangerPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Radial blast animation for down targets - emanates from center */
-.compact-card.status-down:not(.acknowledged):not(.disabled)::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0%;
-    height: 0%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 0, 81, 0.4) 0%,
-        rgba(255, 0, 81, 0.2) 30%,
-        transparent 70%
-    );
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    animation: radialBlast 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    z-index: 0;
-}
-
-/* Acknowledged or disabled down targets stay calm - no pulsing */
-.compact-card.status-down.acknowledged,
-.compact-card.status-down.disabled {
-    animation: none;
-}
-
-.compact-card.status-down.acknowledged::after,
-.compact-card.status-down.disabled::after {
     display: none;
 }
 
-@keyframes dangerPulse {
-    0% {
-        box-shadow:
-            0 2px 8px rgba(0, 0, 0, 0.2),
-            -3px 0 15px var(--danger-glow);
-    }
-    25% {
-        box-shadow:
-            0 2.5px 10px rgba(0, 0, 0, 0.25),
-            -4px 0 22px var(--danger-glow),
-            0 0 20px rgba(255, 0, 81, 0.15);
+.compact-card:hover {
+    box-shadow: 0 4px 12px var(--shadow);
+    border-left-color: var(--primary);
+}
+
+/* Status: UP - Clean Green */
+.compact-card.status-up {
+    border-left-color: var(--success);
+}
+
+.compact-card.status-up:hover {
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+/* Status: DOWN - Clean Red with subtle pulse for unacknowledged */
+.compact-card.status-down {
+    border-left-color: var(--danger);
+}
+
+/* Subtle border pulse for unacknowledged down targets (professional, not flashy) */
+.compact-card.status-down:not(.acknowledged):not(.disabled) {
+    animation: subtleBorderPulse 3s ease-in-out infinite;
+}
+
+@keyframes subtleBorderPulse {
+    0%, 100% {
+        border-left-width: 2px;
     }
     50% {
-        box-shadow:
-            0 3px 12px rgba(0, 0, 0, 0.3),
-            -5px 0 30px var(--danger-glow),
-            0 0 40px rgba(255, 0, 81, 0.3);
-    }
-    75% {
-        box-shadow:
-            0 2.5px 10px rgba(0, 0, 0, 0.25),
-            -4px 0 22px var(--danger-glow),
-            0 0 20px rgba(255, 0, 81, 0.15);
-    }
-    100% {
-        box-shadow:
-            0 2px 8px rgba(0, 0, 0, 0.2),
-            -3px 0 15px var(--danger-glow);
+        border-left-width: 3px;
     }
 }
 
-@keyframes radialBlast {
-    0% {
-        width: 0%;
-        height: 0%;
-        opacity: 0;
-    }
-    15% {
-        width: 120%;
-        height: 120%;
-        opacity: 1;
-    }
-    50% {
-        width: 150%;
-        height: 150%;
-        opacity: 0;
-    }
-    100% {
-        width: 150%;
-        height: 150%;
-        opacity: 0;
-    }
+/* Remove radial blast effect */
+.compact-card.status-down::after {
+    display: none;
 }
 
 .compact-card.status-down:hover {
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        -5px 0 35px var(--danger-glow),
-        inset 0 0 20px rgba(255, 0, 81, 0.1);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 /* Status: Unknown - Dim Gray */
@@ -2401,23 +2268,19 @@ body.light-mode .uptime-bar-container {
     left: 0;
     right: 0;
     height: 70px;
-    background: transparent;
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
     display: flex !important;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
     z-index: 1100;
-    box-shadow: none;
-    transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+    box-shadow: 0 1px 3px var(--shadow);
+    transition: box-shadow 0.3s ease;
 }
 
 .top-nav-bar.scrolled {
-    background: var(--bg-secondary);
-    box-shadow: 0 2px 20px var(--shadow);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    box-shadow: 0 2px 8px var(--shadow);
 }
 
 .nav-left {
@@ -2533,11 +2396,10 @@ body.light-mode .uptime-bar-container {
     height: 2px;
     background: var(--primary);
     transition: all 0.3s;
-    box-shadow: 0 0 8px var(--primary-glow);
 }
 
 .nav-hamburger-btn:hover span {
-    box-shadow: 0 0 12px var(--primary-glow);
+    background: var(--accent-blue-light);
 }
 
 /* ==================== MAIN CONTENT WITH SIDEBAR ==================== */
