@@ -612,14 +612,9 @@ class WebStatusApp {
         });
         document.getElementById('clearFiltersBtn')?.addEventListener('click', () => this.clearEventFilters());
 
-        // Device type and SNMP buttons
+        // Device type buttons
         document.getElementById('deviceType')?.addEventListener('change', (e) => this.handleDeviceTypeChange(e));
         document.getElementById('targetType')?.addEventListener('change', (e) => this.handleTargetTypeChange(e));
-        document.getElementById('snmpVersion')?.addEventListener('change', (e) => this.handleSnmpVersionChange(e));
-        document.getElementById('browseOidBtn')?.addEventListener('click', () => this.showOidBrowserPanel());
-        document.getElementById('closeOidBrowserBtn')?.addEventListener('click', () => this.hideOidBrowserPanel());
-        document.getElementById('oidBrowserBackBtn')?.addEventListener('click', () => this.hideOidBrowserPanel());
-        document.getElementById('oidBrowserOverlay')?.addEventListener('click', () => this.hideOidBrowserPanel());
 
         // Discovery buttons
         document.getElementById('startDiscoveryBtn')?.addEventListener('click', () => this.startDiscovery());
@@ -1275,16 +1270,13 @@ class WebStatusApp {
             form.reset();
             document.getElementById('targetId').value = '';
             document.getElementById('audioBehavior').value = 'normal';
-            document.getElementById('snmpVersion').value = '2c';
-            document.getElementById('snmpCommunity').value = 'public';
-            document.getElementById('snmpPort').value = '161';
 
             // Hide delete button when adding new target
             deleteBtn.style.display = 'none';
         }
 
-        // Show/hide SNMP config based on type
-        this.handleTargetTypeChange({ target: document.getElementById('targetType') });
+        // Initialize target type handler
+        this.handleTargetTypeChange();
 
         panel.classList.add('active');
     }
@@ -2233,31 +2225,11 @@ class WebStatusApp {
         URL.revokeObjectURL(url);
     }
 
-    // ============= SNMP Functions =============
+    // ============= Target Type Functions =============
 
-    handleTargetTypeChange(e) {
-        const targetType = e.target.value;
-        const snmpConfig = document.getElementById('snmpConfig');
-
-        if (targetType === 'snmp') {
-            snmpConfig.style.display = 'block';
-        } else {
-            snmpConfig.style.display = 'none';
-        }
-    }
-
-    handleSnmpVersionChange(e) {
-        const version = e.target.value;
-        const communityGroup = document.getElementById('snmpCommunityGroup');
-        const v3Config = document.getElementById('snmpV3Config');
-
-        if (version === '3') {
-            communityGroup.style.display = 'none';
-            v3Config.style.display = 'block';
-        } else {
-            communityGroup.style.display = 'block';
-            v3Config.style.display = 'none';
-        }
+    handleTargetTypeChange() {
+        // Target type change handler - currently just ping, http, https
+        // Future expansion can add additional logic here
     }
 
     // ============= Discovery Functions =============
@@ -2370,10 +2342,8 @@ class WebStatusApp {
                         <span class="device-type-badge">${device.suggested_type.toUpperCase()}</span>
                     </div>
                     <div class="device-details">
-                        ${device.snmp_enabled ? `<span class="device-feature">SNMP ${device.snmp_version}</span>` : ''}
                         ${device.http_enabled ? '<span class="device-feature">HTTP</span>' : ''}
                         ${device.https_enabled ? '<span class="device-feature">HTTPS</span>' : ''}
-                        ${device.snmp_system_descr ? `<div class="device-description">${device.snmp_system_descr}</div>` : ''}
                     </div>
                     <div class="device-config">
                         <label>Name: <input type="text" class="device-name-input" value="${safeSuggestedName}"></label>
