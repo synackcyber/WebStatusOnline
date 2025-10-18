@@ -30,7 +30,9 @@
         </button>
 
         <header class="dashboard-header">
+            {% if token_name and token_name.upper() != 'NONE' %}
             <h1 class="dashboard-title" data-text="{{ token_name }}">{{ token_name }}</h1>
+            {% endif %}
             <div class="overall-status" id="overallStatus">
                 <div class="status-indicator loading">
                     <span class="status-dot"></span>
