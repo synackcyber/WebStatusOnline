@@ -1,70 +1,62 @@
 /*
  * Public Status Page Styles
- * Matching the main app's dark, geometric, cyberpunk aesthetic
+ * Clean professional design
  */
 
 /* ============================================================================
-   CSS Variables - Matching Main App
+   CSS Variables - Professional Theme
    ============================================================================ */
 
 :root {
     /* Dark theme colors (default) */
-    --bg-primary: #0a0e17;
-    --bg-secondary: #111827;
-    --bg-tertiary: #1a1f2e;
+    --bg-primary: #1a1f2e;
+    --bg-secondary: #252b3b;
+    --bg-tertiary: #2d3548;
 
-    --text-primary: #e0e7ff;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-bright: #f8fafc;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-bright: #f9fafb;
 
     --border: rgba(255, 255, 255, 0.1);
     --border-light: rgba(255, 255, 255, 0.05);
+    --shadow: rgba(0, 0, 0, 0.2);
 
-    /* Status colors */
-    --success: #00ff41;
-    --success-glow: rgba(0, 255, 65, 0.3);
-    --danger: #ff0051;
-    --danger-glow: rgba(255, 0, 81, 0.3);
-    --warning: #ffa500;
-    --warning-glow: rgba(255, 165, 0, 0.3);
-    --info: #00f0ff;
-    --info-glow: rgba(0, 240, 255, 0.3);
-    --unknown: #888;
+    /* Status colors - muted professional */
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #2563eb;
+    --unknown: #6b7280;
 
     /* Primary accent */
-    --primary: #00f0ff;
-    --primary-glow: rgba(0, 240, 255, 0.3);
+    --primary: #2563eb;
 }
 
 /* Light mode - triggered by system preference or manual toggle */
 @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-        --bg-primary: #f8fafc;
-        --bg-secondary: #ffffff;
-        --bg-tertiary: #f1f5f9;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f9fafb;
+        --bg-tertiary: #f3f4f6;
 
-        --text-primary: #1e293b;
-        --text-secondary: #475569;
-        --text-muted: #94a3b8;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
         --text-bright: #0f172a;
 
         --border: rgba(0, 0, 0, 0.1);
         --border-light: rgba(0, 0, 0, 0.05);
+        --shadow: rgba(0, 0, 0, 0.05);
 
-        /* Status colors adjusted for light mode */
-        --success: #00cc33;
-        --success-glow: rgba(0, 204, 51, 0.2);
+        /* Status colors - muted professional */
+        --success: #059669;
         --danger: #dc2626;
-        --danger-glow: rgba(220, 38, 38, 0.2);
-        --warning: #f59e0b;
-        --warning-glow: rgba(245, 158, 11, 0.2);
-        --info: #0ea5e9;
-        --info-glow: rgba(14, 165, 233, 0.2);
-        --unknown: #64748b;
+        --warning: #d97706;
+        --info: #2563eb;
+        --unknown: #6b7280;
 
-        --primary: #0ea5e9;
-        --primary-glow: rgba(14, 165, 233, 0.2);
+        --primary: #2563eb;
     }
 
     /* Light mode overrides for cards and timeline */
