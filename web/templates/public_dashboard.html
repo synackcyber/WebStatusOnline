@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ token_name }} - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/public_dashboard.css">
+</head>
+<body>
+    <!-- Audio Enable Overlay -->
+    <div class="audio-enable-overlay" id="audioEnableOverlay">
+        <div class="audio-enable-modal">
+            <h2>Enable Audio Alerts</h2>
+            <p>Click anywhere to enable real-time audio notifications for status changes.</p>
+            <button class="enable-audio-btn" id="enableAudioBtn">Enable Audio Alerts</button>
+            <small style="opacity: 0.7; margin-top: 16px; display: block;">You can continue without audio, but you won't hear alert sounds</small>
+        </div>
+    </div>
+
+    <div class="dashboard-page">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg class="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+
+        <header class="dashboard-header">
+            <h1 class="dashboard-title" data-text="{{ token_name }}">{{ token_name }}</h1>
+            <div class="overall-status" id="overallStatus">
+                <div class="status-indicator loading">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Loading...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <div class="dashboard-nav">
+            <a href="/public/{{ token }}" class="nav-link">
+                <span class="link-arrow">←</span>
+                <span class="link-text">Back to Status Page</span>
+            </a>
+        </div>
+
+        <main class="dashboard-main">
+            {% if has_targets %}
+            <!-- Dashboard Grid -->
+            <div class="targets-grid" id="targetsGrid">
+                <!-- Loading placeholder -->
+                <div class="loading-placeholder">
+                    <div class="spinner"></div>
+                    <p>Loading cards...</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-services">
+                <div class="no-services-message">
+                    <p>No services are currently being monitored on this dashboard.</p>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="dashboard-footer">
+            <p>
+                Last updated: <span id="lastUpdated">--</span>
+                <span class="auto-refresh-indicator" title="Auto-refreshes every 30 seconds">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                    </svg>
+                </span>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const TOKEN = '{{ token }}';
+        const STATUS_API = `/api/v1/public/${TOKEN}/status`;
+        const HISTORY_API = `/api/v1/public/${TOKEN}/history`;
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        let refreshTimer = null;
+        let currentTab = 'dashboard';
+        let currentRange = '24h';
+
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const sunIcon = themeToggle.querySelector('.sun-icon');
+        const moonIcon = themeToggle.querySelector('.moon-icon');
+
+        // Get saved theme or system preference
+        function getInitialTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                return savedTheme;
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        // Set theme
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            if (theme === 'dark') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        // Initialize theme
+        setTheme(getInitialTheme());
+    </script>
+    <script src="/static/js/public_dashboard.js"></script>
+</body>
+</html>

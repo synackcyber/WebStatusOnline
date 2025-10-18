@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database and logs
+data/*.db
+data/*.db-journal
+logs/*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Deployment scripts
+deploy.sh
+install.sh
+
+# macOS
+.DS_Store
+
+# Test files
+tests/
+.pytest_cache/
+
+# Development files
+requirements-pi.txt
+alerts/relay.py

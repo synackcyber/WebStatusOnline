@@ -1,0 +1,72 @@
+{
+  "library_version": "1.0",
+  "default_down_alert": "system_down.aiff",
+  "default_up_alert": "system_up.aiff",
+  "categories": {
+    "beeps": {
+      "name": "Beeps & Tones",
+      "description": "Simple beep and tone alerts",
+      "alerts": []
+    },
+    "tones": {
+      "name": "Professional Tones",
+      "description": "Professional notification tones",
+      "alerts": []
+    },
+    "vocal": {
+      "name": "Vocal Alerts",
+      "description": "Spoken voice alerts for specific events",
+      "alerts": []
+    },
+    "professional": {
+      "name": "Professional Alerts",
+      "description": "High-quality professional alert sounds",
+      "alerts": []
+    }
+  },
+  "alerts": {
+    "system_down.aiff": {
+      "id": "system_down",
+      "name": "System Down (Default)",
+      "filename": "system_down.aiff",
+      "category": "default",
+      "event_types": [
+        "down",
+        "threshold_reached"
+      ],
+      "description": "Default system down alert",
+      "duration_ms": 1000,
+      "volume_level": "medium"
+    },
+    "system_up.aiff": {
+      "id": "system_up",
+      "name": "System Up (Default)",
+      "filename": "system_up.aiff",
+      "category": "default",
+      "event_types": [
+        "up",
+        "recovered"
+      ],
+      "description": "Default system recovered alert",
+      "duration_ms": 1000,
+      "volume_level": "medium"
+    }
+  },
+  "event_type_mappings": {
+    "threshold_reached": {
+      "name": "Target Down",
+      "description": "When a target fails and reaches failure threshold",
+      "default_alert": "system_down.aiff"
+    },
+    "recovered": {
+      "name": "Target Recovered",
+      "description": "When a failed target comes back online",
+      "default_alert": "system_up.aiff"
+    },
+    "alert_repeat": {
+      "name": "Still Down (Repeat Alert)",
+      "description": "Periodic reminder that target is still down",
+      "default_alert": "system_down.aiff"
+    }
+  }
+}

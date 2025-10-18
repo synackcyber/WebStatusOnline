@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebStatus - System Monitor</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=1760815865">
+</head>
+<body>
+    <!-- Hamburger Menu Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>WebStatus</h1>
+            <button class="close-sidebar-btn" id="closeSidebarBtn">&times;</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="sidebar-nav-item active" data-tab="dashboard">
+                <span class="nav-label">Dashboard</span>
+            </button>
+            <button class="sidebar-nav-item" data-tab="uptime">
+                <span class="nav-label">Timeline</span>
+            </button>
+            <button class="sidebar-nav-item" data-tab="sharing">
+                <span class="nav-label">Status Page</span>
+            </button>
+            <button class="sidebar-nav-item" data-tab="events">
+                <span class="nav-label">Event Log</span>
+            </button>
+            <button class="sidebar-nav-item" data-tab="discovery" data-feature="discovery">
+                <span class="nav-label">Discovery</span>
+            </button>
+            <button class="sidebar-nav-item" data-tab="settings">
+                <span class="nav-label">Settings</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-actions">
+            <button class="btn btn-primary btn-block" id="sidebarAddTargetBtn">
+                <span class="icon-plus"></span> Add Target
+            </button>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="theme-selector">
+                <label>Theme</label>
+                <div class="theme-options">
+                    <button class="theme-option" data-theme="light" title="Light mode">
+                        <span class="theme-option-icon">☀</span>
+                        <span class="theme-option-label">Light</span>
+                    </button>
+                    <button class="theme-option active" data-theme="dark" title="Dark mode">
+                        <span class="theme-option-icon">☾</span>
+                        <span class="theme-option-label">Dark</span>
+                    </button>
+                    <button class="theme-option" data-theme="system" title="System default">
+                        <span class="theme-option-icon">⚙</span>
+                        <span class="theme-option-label">System</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-logout" id="logoutBtn" title="Logout">
+                <span class="logout-icon">⎋</span>
+                <span class="logout-label">Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Transparent Top Navigation Bar -->
+    <nav class="top-nav-bar">
+        <div class="nav-left">
+            <button class="nav-hamburger-btn" id="navHamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="nav-center">
+            <!-- System Status / Alert Indicator -->
+            <div class="nav-status-center" id="navStatusCenter">
+                <span class="system-operational">
+                    <span class="text-desktop">SYSTEM OPERATIONAL</span>
+                    <span class="text-mobile">OPERATIONAL</span>
+                </span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="status-indicators" id="systemStatus">
+                <span class="status-badge-mini" id="statusBadge"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <!-- Compact Target Grid -->
+            <div class="targets-grid-compact" id="targetsGrid">
+            </div>
+
+            <!-- Slide-out Detail Panel -->
+            <div class="slide-panel" id="slidePanel">
+                <div class="slide-panel-overlay" id="slidePanelOverlay"></div>
+                <div class="slide-panel-content" id="slidePanelContent">
+                    <div class="slide-panel-header">
+                        <h2>Target Details</h2>
+                        <button class="close-btn" id="closeSlidePanelBtn">&times;</button>
+                    </div>
+                    <div class="slide-panel-body" id="slidePanelBody">
+                        <!-- Details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Target Slide Panel -->
+            <div class="slide-panel" id="targetEditPanel">
+                <div class="slide-panel-overlay" id="targetEditOverlay"></div>
+                <div class="slide-panel-content slide-panel-wide">
+                    <div class="slide-panel-header">
+                        <h2 id="targetEditTitle">Add Target</h2>
+                        <button class="close-btn" id="closeTargetEditBtn">&times;</button>
+                    </div>
+                    <div class="slide-panel-body">
+                        <form id="targetForm">
+                        <input type="hidden" id="targetId">
+
+                        <div class="form-group">
+                            <label for="targetName">Name *</label>
+                            <input type="text" id="targetName" required placeholder="Production Server">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetType">Type *</label>
+                            <select id="targetType" required>
+                                <option value="ping">Ping (ICMP)</option>
+                                <option value="http">HTTP</option>
+                                <option value="https">HTTPS</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetAddress">Address *</label>
+                            <input type="text" id="targetAddress" required
+                                   placeholder="192.168.1.100 or example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deviceType">Device Type</label>
+                            <select id="deviceType">
+                                <option value="server">Server - Production servers, critical infrastructure</option>
+                                <option value="network">Network - Routers, switches, gateways</option>
+                                <option value="workstation">Workstation - Desktops, laptops</option>
+                                <option value="mobile">Mobile - Phones, tablets (auto-silent)</option>
+                                <option value="printer">Printer - Printers, scanners</option>
+                                <option value="iot">IoT - Smart home, sensors, cameras</option>
+                                <option value="storage">Storage - NAS, file servers</option>
+                                <option value="other" selected>Other - Custom configuration</option>
+                            </select>
+                            <small>Applies smart defaults based on device category</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="failureThreshold">Failure Threshold</label>
+                                <input type="number" id="failureThreshold" min="1" max="20" value="3">
+                                <small>Consecutive failures before alert (default: 3)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkInterval">Check Interval (seconds)</label>
+                                <input type="number" id="checkInterval" min="10" max="600" value="60">
+                                <small>How often to check (default: 60s)</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="audioBehavior">Audio Alert Behavior</label>
+                            <select id="audioBehavior">
+                                <option value="urgent">Urgent - Alert every 30 seconds</option>
+                                <option value="normal" selected>Normal - Alert every 2 minutes</option>
+                                <option value="silent">Silent - No audio alerts</option>
+                            </select>
+                            <small>Choose alert frequency for this target</small>
+                        </div>
+
+                        <!-- Audio Alert Selection -->
+                        <div class="audio-alert-section">
+                            <h3 style="margin: 20px 0 10px; font-size: 1rem; color: var(--text-secondary);">Custom Audio Alerts</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="audioDownAlert">Down Alert Sound</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <select id="audioDownAlert" style="flex: 1;">
+                                            <option value="">Use Default</option>
+                                        </select>
+                                        <button type="button" class="btn btn-secondary btn-small" id="previewDownAudioBtn"><span class="icon-play"></span> Preview</button>
+                                    </div>
+                                    <small>Sound to play when target goes down</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="audioUpAlert">Recovery Alert Sound</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <select id="audioUpAlert" style="flex: 1;">
+                                            <option value="">Use Default</option>
+                                        </select>
+                                        <button type="button" class="btn btn-secondary btn-small" id="previewUpAudioBtn"><span class="icon-play"></span> Preview</button>
+                                    </div>
+                                    <small>Sound to play when target recovers</small>
+                                </div>
+                            </div>
+                            <small style="margin-top: 5px; display: block;">Manage your audio library in Settings → Audio Alert Settings</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label checkbox-label-large">
+                                <input type="checkbox" id="targetEnabled" checked>
+                                <span>Enabled</span>
+                            </label>
+                            <small>Uncheck to disable monitoring for this target (target will be grayed out)</small>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-danger" id="deleteTargetBtn" style="display: none; margin-left: auto;">Delete Target</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Timeline Tab -->
+        <div class="tab-content" id="uptime">
+            <div class="uptime-dashboard">
+                <div class="uptime-filters">
+                    <button class="uptime-filter-btn active" data-range="24h">24 Hours</button>
+                    <button class="uptime-filter-btn" data-range="7d">7 Days</button>
+                    <button class="uptime-filter-btn" data-range="30d">30 Days</button>
+                    <button class="uptime-filter-btn" data-range="90d">90 Days</button>
+                </div>
+                <div class="uptime-grid" id="uptimeGrid">
+                    <div class="loading">Loading uptime data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discovery Tab -->
+        <div class="tab-content" id="discovery">
+            <div class="discovery-container">
+                <div class="discovery-header">
+                    <h2>Network Discovery</h2>
+                    <p>Scan your network to discover devices and add them as monitoring targets</p>
+                </div>
+
+                <div class="discovery-form-section">
+                    <div class="form-group">
+                        <label for="discoverySubnet">Subnet (CIDR notation) *</label>
+                        <input type="text" id="discoverySubnet" placeholder="192.168.1.0/24" value="192.168.1.0/24">
+                        <small>Enter network in CIDR format (e.g., 192.168.1.0/24 for 192.168.1.1-254)</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="discoveryConcurrent">Concurrent Scans</label>
+                            <input type="number" id="discoveryConcurrent" min="1" max="100" value="50">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="discoveryTimeout">Timeout (seconds)</label>
+                            <input type="number" id="discoveryTimeout" min="1" max="10" value="2">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="discoveryCheckHttp" checked>
+                                Check for HTTP/HTTPS
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="discovery-actions">
+                        <button class="btn btn-primary" id="startDiscoveryBtn"><span class="icon-search"></span> Start Discovery</button>
+                        <button class="btn btn-secondary" id="stopDiscoveryBtn" style="display: none;"><span class="icon-stop"></span> Stop</button>
+                    </div>
+                </div>
+
+                <div class="discovery-progress" id="discoveryProgress" style="display: none;">
+                    <div class="loading-spinner"></div>
+                </div>
+
+                <div class="discovery-results" id="discoveryResults" style="display: none;">
+                    <div class="results-header">
+                        <h3>Discovered Devices (<span id="discoveredCount">0</span>)</h3>
+                        <div class="results-actions">
+                            <button class="btn btn-secondary btn-small" id="selectAllDevicesBtn">Select All</button>
+                            <button class="btn btn-secondary btn-small" id="deselectAllDevicesBtn">Deselect All</button>
+                            <button class="btn btn-primary btn-small" id="importSelectedBtn">Import Selected</button>
+                        </div>
+                    </div>
+                    <div class="discovered-devices-list" id="discoveredDevicesList">
+                        <!-- Devices will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sharing Tab -->
+        <div class="tab-content" id="sharing">
+            <div class="sharing-section">
+                <!-- Page Header Card (Like Event Log) -->
+                <div class="settings-card page-title-card">
+                    <div class="event-log-header">
+                        <div>
+                            <h2>Public Status Page</h2>
+                            <p class="page-subtitle">Share monitoring status with your team or customers. No authentication required.</p>
+                        </div>
+                        <div class="event-log-controls">
+                            <button class="btn btn-primary" id="generateTokenBtn">
+                                <span class="icon-plus"></span> Generate New Link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Public Links Section -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3>Public Links</h3>
+                        <span class="card-badge" id="linksCount">0 links</span>
+                    </div>
+                    <p class="card-description">
+                        Shareable links that display your monitoring status. Each link can be toggled independently.
+                    </p>
+                    <div class="public-links-container" id="publicLinksContainer">
+                        <!-- Public links will be rendered here by JavaScript -->
+                        <div class="loading-placeholder">
+                            <div class="spinner-small"></div>
+                            <p>Loading public links...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide-out Panel for Link Configuration -->
+            <div class="slide-out-overlay" id="linkConfigPanel" style="display: none;">
+                <div class="slide-out-panel">
+                    <div class="slide-out-header">
+                        <h2>Configure Public Link</h2>
+                        <button class="slide-out-close" onclick="app.closeLinkConfigPanel()">×</button>
+                    </div>
+
+                    <div class="slide-out-body">
+                        <!-- Link Generation Form -->
+                        <div class="slide-out-section">
+                            <h3>Link Details</h3>
+                            <div class="form-group">
+                                <label for="panelTokenName">Link Name (optional)</label>
+                                <input type="text" id="panelTokenName" class="form-control" placeholder="e.g., Production Status Page">
+                            </div>
+                            <div class="form-group">
+                                <label for="panelViewMode">View Mode</label>
+                                <select id="panelViewMode" class="form-control">
+                                    <option value="both">Both Views (Timeline + Cards)</option>
+                                    <option value="timeline">Timeline Only</option>
+                                    <option value="cards">Cards Only</option>
+                                </select>
+                                <small class="form-text">Choose which views visitors can see</small>
+                            </div>
+                        </div>
+
+                        <!-- Target Visibility Section -->
+                        <div class="slide-out-section">
+                            <h3>Target Visibility</h3>
+                            <p class="section-description">Select which targets appear on this public page.</p>
+                            <div class="target-visibility-container" id="panelTargetVisibilityContainer">
+                                <!-- Target visibility controls will be rendered here -->
+                                <div class="loading-placeholder">
+                                    <div class="spinner-small"></div>
+                                    <p>Loading targets...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide-out-footer">
+                        <button class="btn btn-secondary btn-large" onclick="app.closeLinkConfigPanel()">Cancel</button>
+                        <button class="btn btn-primary btn-large" id="panelGenerateBtn">Generate Link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings">
+            <!-- System Health Monitor -->
+            <div class="settings-section">
+                <h2>System Health Monitor</h2>
+                <p class="health-subtitle">Real-time status of all system components</p>
+
+                <div class="health-grid" id="healthGrid">
+                    <!-- Health cards will be populated by JavaScript -->
+                </div>
+
+                <div class="health-overall" id="healthOverall">
+                    <div class="overall-status">
+                        <span class="overall-label">OVERALL STATUS:</span>
+                        <span class="overall-badge" id="overallStatusBadge">CHECKING...</span>
+                    </div>
+                    <button class="btn btn-primary" id="refreshHealthBtn">
+                        <span class="icon-refresh"></span> Refresh Health Check
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>General Settings</h2>
+                <form id="settingsForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkIntervalDefault">Check Interval (seconds)</label>
+                            <input type="number" id="checkIntervalDefault" min="10" max="3600">
+                            <small>How often to check if each service is up or down</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="failureThresholdDefault">Failure Threshold (consecutive failures)</label>
+                            <input type="number" id="failureThresholdDefault" min="1" max="10">
+                            <small>Number of failed checks in a row before marking service as down</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pingTimeout">Ping Timeout (seconds)</label>
+                            <input type="number" id="pingTimeout" min="1" max="30">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="httpTimeout">HTTP Timeout (seconds)</label>
+                            <input type="number" id="httpTimeout" min="1" max="60">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alertRepeatInterval">Alert Repeat Interval (seconds)</label>
+                        <input type="number" id="alertRepeatInterval" min="60" max="3600">
+                        <small>How often to re-trigger ALL alerts (relay + audio + webhook) while system stays down. Works independently of Audio Loop.</small>
+                    </div>
+                </form>
+            </div>
+
+            <div class="settings-section">
+                <h2>Audio Alert Settings</h2>
+                <form id="audioForm">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="audioEnabled">
+                            Enable Audio Alerts
+                        </label>
+                        <small style="margin-left: 30px; margin-top: 5px;">Master switch for audio. Per-target audio behavior is configured when adding/editing targets.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Default Alert Sounds</label>
+                        <small>These sounds are used when targets have "Use Default" selected for their custom audio alerts.</small>
+                        <div class="form-row" style="margin-top: 10px;">
+                            <div class="form-group">
+                                <label for="defaultDownSound">Default Down Alert Sound</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <select id="defaultDownSound" style="flex: 1;">
+                                        <option value="system_down.aiff">System Down (Default)</option>
+                                    </select>
+                                    <button type="button" class="btn btn-secondary btn-small" id="previewDefaultDownBtn"><span class="icon-play"></span> Preview</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="defaultUpSound">Default Recovery Alert Sound</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <select id="defaultUpSound" style="flex: 1;">
+                                        <option value="system_up.aiff">System Up (Default)</option>
+                                    </select>
+                                    <button type="button" class="btn btn-secondary btn-small" id="previewDefaultUpBtn"><span class="icon-play"></span> Preview</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Audio Library</label>
+                        <small>Manage your custom alert sounds. Upload new sounds and organize your audio library.</small>
+
+                        <div style="margin-top: 15px;">
+                            <button type="button" class="btn btn-primary" id="uploadNewSoundBtn">
+                                <span class="icon-plus"></span> Upload New Sound
+                            </button>
+                        </div>
+
+                        <!-- Upload Form (hidden by default) -->
+                        <div id="audioUploadForm" style="display: none; margin-top: 15px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+                            <h3 style="margin: 0 0 15px; font-size: 1rem;">Upload New Audio Alert</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="newAudioFile">Audio File</label>
+                                    <input type="file" id="newAudioFile" accept="audio/*">
+                                    <small>Supported: WAV, MP3, AIFF, OGG, M4A (max 10MB)</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newAudioName">Display Name</label>
+                                    <input type="text" id="newAudioName" placeholder="e.g., Critical Alert">
+                                    <small>Leave blank to use filename</small>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="newAudioCategory">Category</label>
+                                    <select id="newAudioCategory">
+                                        <option value="professional">Professional</option>
+                                        <option value="beeps">Beeps & Alerts</option>
+                                        <option value="tones">Professional Tones</option>
+                                        <option value="vocal">Vocal Alerts</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newAudioEventTypes">Event Types</label>
+                                    <select id="newAudioEventTypes" multiple size="3">
+                                        <option value="down" selected>Down Alert</option>
+                                        <option value="threshold_reached" selected>Threshold Reached</option>
+                                        <option value="up">Recovery/Up</option>
+                                        <option value="recovered">Recovered</option>
+                                    </select>
+                                    <small>Hold Ctrl/Cmd to select multiple</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newAudioDescription">Description (optional)</label>
+                                <input type="text" id="newAudioDescription" placeholder="e.g., Urgent warning tone">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn btn-primary" id="uploadAudioBtn">Upload</button>
+                                <button type="button" class="btn btn-secondary" id="cancelUploadBtn">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Audio Library Grid -->
+                        <div id="audioLibraryGrid" style="margin-top: 20px;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" id="testAudioBtn">Test Audio</button>
+                </form>
+            </div>
+
+            <div class="settings-section">
+                <h2>Webhook Notification Settings</h2>
+                <form id="webhookForm">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="webhookEnabled">
+                            Enable Webhook Notifications
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhookUrl">Webhook URL</label>
+                        <input type="url" id="webhookUrl" placeholder="https://hooks.example.com/webhook">
+                        <small>HTTP POST endpoint to receive alert notifications</small>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="testWebhookBtn">Test Webhook</button>
+                </form>
+            </div>
+
+            <div class="settings-section">
+                <h2>Email (SMTP) Notification Settings</h2>
+                <form id="smtpForm">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="smtpEnabled">
+                            Enable Email Notifications
+                        </label>
+                        <small style="margin-left: 30px; margin-top: 5px;">Send email alerts when targets go down or recover</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtpHost">SMTP Server</label>
+                            <input type="text" id="smtpHost" placeholder="smtp.gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpPort">Port</label>
+                            <input type="number" id="smtpPort" placeholder="587" min="1" max="65535">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="smtpUseTls" checked>
+                            Use TLS/STARTTLS
+                        </label>
+                        <small style="margin-left: 30px; margin-top: 5px;">Recommended for secure connections (port 587)</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtpUsername">Username</label>
+                            <input type="text" id="smtpUsername" placeholder="user@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpPassword">Password</label>
+                            <input type="password" id="smtpPassword" placeholder="Enter password">
+                            <small>Password is stored securely. Leave blank to keep existing password.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtpFromAddress">From Email Address</label>
+                            <input type="email" id="smtpFromAddress" placeholder="alerts@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpFromName">From Name</label>
+                            <input type="text" id="smtpFromName" placeholder="WebStatus">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtpRecipients">Recipients</label>
+                        <textarea id="smtpRecipients" rows="3" placeholder="user1@example.com&#10;user2@example.com&#10;team@example.com"></textarea>
+                        <small>One email address per line. All recipients will receive alert notifications.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtpTestEmail">Test Email Address</label>
+                        <div class="smtp-test-row">
+                            <input type="email" id="smtpTestEmail" placeholder="test@example.com">
+                            <button type="button" class="btn btn-secondary" id="testSmtpBtn">Send Test Email</button>
+                        </div>
+                        <small>Send a test email to verify your SMTP configuration</small>
+                    </div>
+                </form>
+            </div>
+
+            <div class="settings-section">
+                <h2>Backup Settings</h2>
+                <form id="backupForm">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="backupEnabled">
+                            Enable Automated Backups
+                        </label>
+                        <small style="margin-left: 30px; margin-top: 5px;">Automatically backup database and configuration on a schedule</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="backupSchedule">Backup Schedule</label>
+                            <select id="backupSchedule">
+                                <option value="0 * * * *">Every Hour</option>
+                                <option value="0 */4 * * *">Every 4 Hours</option>
+                                <option value="0 */6 * * *">Every 6 Hours</option>
+                                <option value="0 */12 * * *">Every 12 Hours</option>
+                                <option value="0 2 * * *" selected>Daily at 2:00 AM</option>
+                                <option value="0 0 * * *">Daily at Midnight</option>
+                                <option value="0 12 * * *">Daily at Noon</option>
+                                <option value="0 0 * * 0">Weekly (Sunday at Midnight)</option>
+                                <option value="0 0 1 * *">Monthly (1st of Month)</option>
+                            </select>
+                            <small>When to automatically create backups</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="backupRetentionDays">Retention (Days)</label>
+                            <input type="number" id="backupRetentionDays" placeholder="30" min="1" max="365">
+                            <small>Backups older than this will be automatically deleted</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="backupCompression" checked>
+                            Compress Backups
+                        </label>
+                        <small style="margin-left: 30px; margin-top: 5px;">Create compressed .tar.gz files (recommended)</small>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+                        <label>Manual Backup Operations</label>
+                        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" id="createBackupBtn">
+                                <span class="icon-plus"></span> Create Backup Now
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="viewBackupsBtn">
+                                <span class="icon-list"></span> View Backups
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="uploadBackupBtn">
+                                <span class="icon-upload"></span> Upload Backup
+                            </button>
+                        </div>
+
+                        <!-- Hidden file input for backup upload -->
+                        <input type="file" id="backupFileInput" accept=".tar.gz,.tgz" style="display: none;">
+
+                        <small style="display: block; margin-top: 10px; color: var(--text-secondary);">
+                            Upload a backup from another server or a previously downloaded backup to restore it.
+                        </small>
+                    </div>
+
+                    <!-- Backup List (hidden by default) -->
+                    <div id="backupListContainer" style="display: none; margin-top: 20px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+                        <h3 style="margin: 0 0 15px; font-size: 1rem;">Available Backups</h3>
+                        <div id="backupList">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
+            </div>
+        </div>
+
+        <!-- Event Log Tab -->
+        <div class="tab-content" id="events">
+            <div class="event-log-container">
+                <div class="event-log-header">
+                    <h2>Event Log Stream</h2>
+                    <div class="event-log-controls">
+                        <button class="btn btn-secondary btn-small" id="exportCsvBtn">Export CSV</button>
+                        <button class="btn btn-secondary btn-small" id="exportJsonBtn">Export JSON</button>
+                        <button class="btn btn-secondary btn-small" id="clearEventsBtn">Clear Display</button>
+                        <button class="btn btn-secondary btn-small" id="pauseEventsBtn">Pause</button>
+                    </div>
+                </div>
+
+                <div class="event-log-filters">
+                    <div class="filter-group">
+                        <label for="filterTarget">Target:</label>
+                        <select id="filterTarget">
+                            <option value="">All Targets</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterEventType">Event Type:</label>
+                        <select id="filterEventType">
+                            <option value="">All Events</option>
+                            <option value="threshold_reached">Down</option>
+                            <option value="alert_repeat">Still Down</option>
+                            <option value="recovered">Recovered</option>
+                            <option value="target_created">Created</option>
+                            <option value="target_updated">Updated</option>
+                            <option value="target_deleted">Deleted</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDateFrom">From:</label>
+                        <input type="datetime-local" id="filterDateFrom">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDateTo">To:</label>
+                        <input type="datetime-local" id="filterDateTo">
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn btn-primary btn-small" id="applyFiltersBtn">Apply Filters</button>
+                        <button class="btn btn-secondary btn-small" id="clearFiltersBtn">Clear Filters</button>
+                    </div>
+                </div>
+
+                <div class="event-log-content" id="eventLogContent">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- End Main Content -->
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/static/js/app-new.js?v=1760817528"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Enhancements Demo - WebStatus</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .demo-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .demo-section h2 {
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .demo-item {
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .demo-item h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 40px;">UI Enhancements Demo</h1>
+
+        <!-- Loading States Section -->
+        <div class="demo-section">
+            <h2>Loading States</h2>
+
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Enhanced Spinner</h3>
+                    <div class="spinner-container">
+                        <div class="spinner-enhanced"></div>
+                        <div class="spinner-text">Loading targets...</div>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h3>Small Spinner</h3>
+                    <div class="spinner-container">
+                        <div class="spinner-enhanced spinner-small"></div>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h3>Dots Loader</h3>
+                    <div class="spinner-container">
+                        <div class="dots-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="spinner-text">Processing...</div>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h3>Progress Bar</h3>
+                    <div style="padding: 20px 0;">
+                        <div class="progress-loader"></div>
+                        <p style="text-align: center; margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">Loading data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Skeleton Loaders</h3>
+            <div class="demo-grid">
+                <div class="skeleton-target-card">
+                    <div class="skeleton-line skeleton-line-title"></div>
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-line skeleton-line-medium"></div>
+                    <div class="skeleton-line skeleton-line-short"></div>
+                </div>
+
+                <div class="skeleton-target-card">
+                    <div class="skeleton-line skeleton-line-title"></div>
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-line skeleton-line-medium"></div>
+                    <div class="skeleton-line skeleton-line-short"></div>
+                </div>
+
+                <div class="skeleton-target-card">
+                    <div class="skeleton-line skeleton-line-title"></div>
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-line skeleton-line-medium"></div>
+                    <div class="skeleton-line skeleton-line-short"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty States Section -->
+        <div class="demo-section">
+            <h2>Empty States</h2>
+
+            <div class="empty-state empty-targets">
+                <div class="empty-state-icon">📊</div>
+                <h3 class="empty-state-title">No Monitoring Targets</h3>
+                <p class="empty-state-description">
+                    Get started by adding your first monitoring target. You can monitor servers, network devices, or any IP-based service.
+                </p>
+                <div class="empty-state-action">
+                    <button class="btn btn-primary">
+                        <span class="icon-plus"></span> Add Your First Target
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;" class="empty-state empty-events empty-state-compact">
+                <div class="empty-state-icon">📋</div>
+                <h3 class="empty-state-title">No Events Yet</h3>
+                <p class="empty-state-description">
+                    Events will appear here when your targets change status or when system events occur.
+                </p>
+            </div>
+        </div>
+
+        <!-- Micro-interactions Section -->
+        <div class="demo-section">
+            <h2>Micro-interactions & Animations</h2>
+
+            <h3>Button Effects (Click & Hover)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                <button class="btn btn-primary">Primary Button</button>
+                <button class="btn btn-secondary">Secondary Button</button>
+                <button class="btn btn-danger">Danger Button</button>
+            </div>
+
+            <h3 style="margin-top: 30px;">Input Focus Effects</h3>
+            <div style="max-width: 500px; margin: 20px 0;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Text Input</label>
+                    <input type="text" placeholder="Click to focus and see the effect" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary);">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Select Dropdown</label>
+                    <select style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary);">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                        <option>Option 3</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">Checkbox</label>
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox"> Click to see scale animation
+                    </label>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Card Animations (Staggered Slide-in)</h3>
+            <div class="targets-grid-compact">
+                <div class="compact-card slide-in" style="padding: 20px; background: var(--bg-tertiary); border: 1px solid var(--border); min-height: 100px;">
+                    <h4 style="margin: 0 0 10px 0;">Card 1</h4>
+                    <p style="margin: 0; color: var(--text-secondary);">Hover over me!</p>
+                </div>
+                <div class="compact-card slide-in" style="padding: 20px; background: var(--bg-tertiary); border: 1px solid var(--border); min-height: 100px;">
+                    <h4 style="margin: 0 0 10px 0;">Card 2</h4>
+                    <p style="margin: 0; color: var(--text-secondary);">Hover over me!</p>
+                </div>
+                <div class="compact-card slide-in" style="padding: 20px; background: var(--bg-tertiary); border: 1px solid var(--border); min-height: 100px;">
+                    <h4 style="margin: 0 0 10px 0;">Card 3</h4>
+                    <p style="margin: 0; color: var(--text-secondary);">Hover over me!</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Status Badges (Hover to Scale)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                <span class="status-badge" style="padding: 8px 16px; background: var(--success); color: white; border-radius: 6px; font-weight: 600;">ONLINE</span>
+                <span class="status-badge" style="padding: 8px 16px; background: var(--danger); color: white; border-radius: 6px; font-weight: 600;">OFFLINE</span>
+                <span class="status-badge" style="padding: 8px 16px; background: var(--warning); color: white; border-radius: 6px; font-weight: 600;">WARNING</span>
+                <span class="status-badge" style="padding: 8px 16px; background: var(--info); color: white; border-radius: 6px; font-weight: 600;">INFO</span>
+            </div>
+
+            <h3 style="margin-top: 30px;">Animation Effects</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                <button class="btn btn-secondary" onclick="this.classList.add('shake'); setTimeout(() => this.classList.remove('shake'), 500)">
+                    Shake Me
+                </button>
+                <button class="btn btn-secondary" onclick="this.classList.add('glow-effect')">
+                    Glow Effect (stays on)
+                </button>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4>Success Checkmark Animation</h4>
+                <div class="success-checkmark">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="demo-section">
+            <h2>Theme Support</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">All components support both light and dark themes. Try switching!</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="document.body.classList.remove('light-mode')">Dark Mode</button>
+                <button class="btn btn-secondary" onclick="document.body.classList.add('light-mode')">Light Mode</button>
+            </div>
+        </div>
+
+        <!-- Accessibility Note -->
+        <div class="demo-section" style="background: var(--bg-tertiary); border-left: 4px solid var(--success);">
+            <h2>Accessibility</h2>
+            <p style="color: var(--text-secondary); margin: 0;">
+                All animations automatically respect the user's <code>prefers-reduced-motion</code> setting for accessibility.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Simple demo script
+        console.log('UI Enhancements Demo loaded successfully!');
+
+        // Apply theme based on system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            // document.body.classList.add('light-mode');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "failure_threshold": 3,
+  "check_interval": 60,
+  "alert_repeat_interval": 300,
+  "audio_enabled": true,
+  "webhook_url": "",
+  "webhook_enabled": true,
+  "web_port": 8000,
+  "ping_timeout": 3,
+  "ping_packet_count": 3,
+  "ping_min_success": 1,
+  "http_timeout": 10
+}

@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  webstatus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webstatus
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist database
+      - ./data:/app/data
+      # Persist logs
+      - ./logs:/app/logs
+      # Persist configuration
+      - ./config.json:/app/config.json
+      # Persist custom sounds
+      - ./sounds/custom:/app/sounds/custom
+    environment:
+      - TZ=America/New_York  # Change to your timezone
+      - PYTHONUNBUFFERED=1
+      # Feature Flags - Control feature availability
+      - ENABLE_DISCOVERY=true  # Enable network discovery feature (default: true for self-hosted)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v1/status', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
