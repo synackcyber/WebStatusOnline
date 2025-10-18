@@ -255,38 +255,10 @@ body {
     overflow-x: hidden;
 }
 
-/* Animated grid background */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridMove 20s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* Floating particles */
+/* Clean background - no patterns */
+body::before,
 body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(0, 255, 65, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255, 0, 81, 0.05) 0%, transparent 50%);
-    animation: particleFloat 15s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
+    display: none;
 }
 
 @keyframes gridMove {
