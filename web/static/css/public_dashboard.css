@@ -226,52 +226,49 @@ body::after {
    ============================================================================ */
 
 .dashboard-page {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 24px 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 1;
-    animation: pageEnter 0.6s ease-out;
 }
 
 @keyframes pageEnter {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
-/* Header - Compact Professional */
+/* Header - Very Compact Professional */
 .dashboard-header {
     text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
 }
 
 .dashboard-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 12px;
     color: var(--text-primary);
-    letter-spacing: 0.5px;
+    letter-spacing: 0px;
 }
 
-/* Overall Status Indicator - Clean and Compact */
+/* Overall Status Indicator - Very Compact */
 .overall-status {
     display: inline-block;
-    padding: 12px 32px;
-    border-radius: 8px;
+    padding: 8px 24px;
+    border-radius: 6px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    box-shadow: 0 1px 3px var(--shadow);
+    box-shadow: 0 1px 2px var(--shadow);
 }
 
 /* Remove pulse animation */
@@ -284,11 +281,11 @@ body::after {
 .status-indicator {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.95rem;
+    gap: 8px;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     color: var(--text-primary);
 }
 
@@ -296,11 +293,11 @@ body::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     border: 2px solid;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
 }
 
@@ -656,22 +653,16 @@ body::after {
 
 .uptime-bar {
     width: 100%;
-    height: 10px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 6px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 3px;
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .uptime-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    display: none;
 }
 
 .uptime-fill {
@@ -739,24 +730,24 @@ body::after {
 
 .timeline-filters {
     display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 16px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 8px 20px;
+    padding: 6px 16px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 6px;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 /* Remove hover animation effect */
@@ -797,88 +788,68 @@ body::after {
 }
 
 .timeline-row {
-    background: rgba(17, 24, 39, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 24px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    position: relative;
-    overflow: hidden;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px var(--shadow);
+    margin-bottom: 8px;
 }
 
 .timeline-row::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(0, 240, 255, 0) 0%,
-        rgba(0, 240, 255, 0.03) 50%,
-        rgba(0, 240, 255, 0) 100%
-    );
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
+    display: none;
 }
 
 .timeline-row:hover {
-    border-color: rgba(0, 240, 255, 0.5);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(0, 240, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 2px 4px var(--shadow);
+    transform: none;
 }
 
 .timeline-row:hover::after {
-    opacity: 1;
+    display: none;
 }
 
 .timeline-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .timeline-target-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-bright);
-    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0px;
 }
 
 .timeline-uptime {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--success);
 }
 
 .timeline-chart {
     display: flex;
-    gap: 4px;
-    height: 60px;
+    gap: 2px;
+    height: 40px;
     border: 1px solid var(--border);
     background: var(--bg-tertiary);
     overflow: hidden;
     position: relative;
-    padding: 4px;
+    padding: 3px;
+    border-radius: 4px;
 }
 
 .timeline-bar {
     flex: 1;
-    min-width: 3px;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 2px;
+    transition: all 0.15s ease;
     position: relative;
     transform-origin: bottom;
-    border-radius: 2px;
+    border-radius: 1px;
 }
 
 .timeline-bar.status-up {
@@ -894,27 +865,26 @@ body::after {
 }
 
 .timeline-bar:hover {
-    transform: scaleY(1.3);
+    transform: scaleY(1.2);
     z-index: 10;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    opacity: 0.8;
 }
 
 .timeline-bar.status-up:hover {
     background: var(--success);
-    box-shadow: 0 2px 12px var(--success-glow);
 }
 
 .timeline-bar.status-down:hover {
     background: var(--danger);
-    box-shadow: 0 2px 12px var(--danger-glow);
 }
 
 .timeline-legend {
     display: flex;
-    gap: 12px;
-    margin-top: 16px;
+    gap: 10px;
+    margin-top: 10px;
     justify-content: flex-start;
+    font-size: 0.75rem;
 }
 
 /* ============================================================================
