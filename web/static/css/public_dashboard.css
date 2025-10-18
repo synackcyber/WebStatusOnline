@@ -228,7 +228,7 @@ body::after {
 .dashboard-page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 24px 20px;
+    padding: 16px 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -248,15 +248,15 @@ body::after {
 /* Header - Very Compact Professional */
 .dashboard-header {
     text-align: center;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
 }
 
 .dashboard-title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     color: var(--text-primary);
     letter-spacing: 0px;
 }
@@ -264,8 +264,8 @@ body::after {
 /* Overall Status Indicator - Very Compact */
 .overall-status {
     display: inline-block;
-    padding: 8px 24px;
-    border-radius: 6px;
+    padding: 6px 16px;
+    border-radius: 4px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     box-shadow: 0 1px 2px var(--shadow);
@@ -281,8 +281,8 @@ body::after {
 .status-indicator {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
+    gap: 6px;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -293,11 +293,11 @@ body::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     border: 2px solid;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: bold;
 }
 
@@ -730,19 +730,19 @@ body::after {
 
 .timeline-filters {
     display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
+    gap: 4px;
+    margin-bottom: 12px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 6px 16px;
+    padding: 4px 12px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 4px;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -784,17 +784,17 @@ body::after {
 .timeline-grid {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 6px;
 }
 
 .timeline-row {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px 16px;
+    border-radius: 4px;
+    padding: 10px 12px;
     transition: all 0.2s ease;
     box-shadow: 0 1px 2px var(--shadow);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .timeline-row::after {
@@ -815,32 +815,32 @@ body::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .timeline-target-name {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: 0px;
 }
 
 .timeline-uptime {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--success);
 }
 
 .timeline-chart {
     display: flex;
-    gap: 2px;
-    height: 40px;
+    gap: 1px;
+    height: 32px;
     border: 1px solid var(--border);
     background: var(--bg-tertiary);
     overflow: hidden;
     position: relative;
-    padding: 3px;
-    border-radius: 4px;
+    padding: 2px;
+    border-radius: 3px;
 }
 
 .timeline-bar {
