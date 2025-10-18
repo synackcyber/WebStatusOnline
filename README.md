@@ -26,8 +26,8 @@ The easiest way to get started:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/WebStatus.git
-cd WebStatus
+git clone https://github.com/synackcyber/WebStatusOnline.git
+cd WebStatusOnline
 
 # Start with Docker
 ./docker-quickstart.sh
