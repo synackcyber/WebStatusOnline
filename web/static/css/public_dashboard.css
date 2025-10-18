@@ -248,86 +248,67 @@ body::after {
     }
 }
 
-/* Header */
+/* Header - Compact Professional */
 .dashboard-header {
     text-align: center;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
 }
 
 .dashboard-title {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 32px;
-    color: var(--text-bright);
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    text-shadow: 0 0 20px var(--primary-glow);
-    position: relative;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
 }
 
-/* Overall Status Indicator */
+/* Overall Status Indicator - Clean and Compact */
 .overall-status {
     display: inline-block;
-    padding: 20px 48px;
-    border-radius: 0;
-    background: rgba(17, 24, 39, 0.8);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid rgba(0, 240, 255, 0.3);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 40px rgba(0, 240, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
-    animation: statusPulse 4s ease-in-out infinite;
+    padding: 12px 32px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px var(--shadow);
 }
 
+/* Remove pulse animation */
 @keyframes statusPulse {
     0%, 100% {
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.4),
-            0 0 40px rgba(0, 240, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    50% {
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.5),
-            0 0 60px rgba(0, 240, 255, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        opacity: 1;
     }
 }
 
 .status-indicator {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 1.1rem;
-    font-weight: 700;
+    gap: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
 }
 
 .status-dot {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
     border: 2px solid;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: bold;
 }
 
-/* Status indicator variants */
+/* Status indicator variants - Clean, no glow */
 .status-indicator.operational .status-dot {
     border-color: var(--success);
     color: var(--success);
     background: transparent;
-    box-shadow: 0 0 10px var(--success-glow);
 }
 
 .status-indicator.operational .status-text {
@@ -338,7 +319,6 @@ body::after {
     border-color: var(--warning);
     color: var(--warning);
     background: transparent;
-    box-shadow: 0 0 10px var(--warning-glow);
 }
 
 .status-indicator.degraded .status-text {
@@ -349,8 +329,6 @@ body::after {
     border-color: var(--danger);
     color: var(--danger);
     background: transparent;
-    box-shadow: 0 0 10px var(--danger-glow);
-    animation: pulse 2s ease-in-out infinite;
 }
 
 .status-indicator.down .status-text {
@@ -761,77 +739,51 @@ body::after {
 
 .timeline-filters {
     display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 20px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 12px 28px;
-    background: rgba(17, 24, 39, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    position: relative;
-    overflow: hidden;
+    letter-spacing: 0.5px;
 }
 
+/* Remove hover animation effect */
 .filter-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(0, 240, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.4s, height 0.4s;
-}
-
-.filter-btn:hover::before {
-    width: 300px;
-    height: 300px;
+    display: none;
 }
 
 .filter-btn:hover {
     border-color: var(--primary);
     color: var(--primary);
-    box-shadow: 0 0 20px var(--primary-glow);
-    transform: translateY(-2px);
+    background: var(--hover-bg);
 }
 
 .filter-btn.active {
-    background: rgba(0, 240, 255, 0.15);
+    background: var(--primary);
     border-color: var(--primary);
-    color: var(--primary);
-    box-shadow:
-        0 0 25px var(--primary-glow),
-        inset 0 0 20px rgba(0, 240, 255, 0.1);
+    color: white;
+    box-shadow: 0 1px 3px var(--shadow);
 }
 
 .filter-btn.active::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border: 1px solid var(--primary);
-    animation: borderPulse 2s ease-in-out infinite;
+    display: none;
 }
 
 @keyframes borderPulse {
     0%, 100% {
-        opacity: 0.5;
+        opacity: 1;
     }
     50% {
         opacity: 1;
