@@ -653,7 +653,8 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
             try:
                 alert_time = datetime.fromisoformat(alert['timestamp'].replace('Z', '+00:00'))
                 if alert_time.tzinfo is None:
-                    alert_time = alert_time.replace(tzinfo=None)
+                    # If no timezone info, assume UTC
+                    alert_time = alert_time.replace(tzinfo=timezone.utc)
 
                 # Skip if outside time range
                 if alert_time < cutoff_time:

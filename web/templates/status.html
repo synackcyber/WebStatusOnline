@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>{% if token_name and token_name.upper() != 'NONE' %}{{ token_name }} - Status{% else %}Status Page{% endif %}</title>
-    <link rel="stylesheet" href="/static/css/status.css?v=1760819300&bust={{ range(1, 9999999) | random }}">
+    <link rel="stylesheet" href="/static/css/status.css?v=1760822000&bust={{ range(1, 9999999) | random }}">
 </head>
 <body>
     <div class="status-page">
@@ -266,6 +266,13 @@
         function renderTimeline(historyData) {
             const container = document.getElementById('timelineGrid');
 
+            console.log('=== TIMELINE RENDER DEBUG ===');
+            console.log('statusData available?', !!statusData);
+            if (statusData) {
+                console.log('statusData.services:', statusData.services);
+            }
+            console.log('historyData targets:', historyData);
+
             if (!historyData || historyData.length === 0) {
                 container.innerHTML = `
                     <div class="no-services-message">
@@ -306,16 +313,26 @@
                 // Get current status from the statusData (real-time status from /status API)
                 let currentStatus = 'unknown';
                 if (statusData && statusData.services) {
-                    const service = statusData.services.find(s => s.name === target.name || s.id === target.id);
+                    // Try multiple matching strategies
+                    const service = statusData.services.find(s => {
+                        // Match by ID (most reliable)
+                        if (s.id === target.id) return true;
+                        // Match by exact name
+                        if (s.name === target.name) return true;
+                        // Match by case-insensitive name
+                        if (s.name && target.name && s.name.toLowerCase() === target.name.toLowerCase()) return true;
+                        return false;
+                    });
+
                     if (service) {
                         currentStatus = service.status || 'unknown';
-                        console.log(`Timeline: Matched service "${target.name}" with status "${currentStatus}"`);
+                        console.log(`✓ Timeline: Matched "${target.name}" → status="${currentStatus}" (via ${service.id === target.id ? 'ID' : 'name'})`);
                     } else {
-                        console.log(`Timeline: Could not match target "${target.name}" (id: ${target.id})`);
-                        console.log('Available services:', statusData.services.map(s => ({ name: s.name, id: s.id })));
+                        console.warn(`✗ Timeline: NO MATCH for "${target.name}" (id: ${target.id})`);
+                        console.log('  Available services:', statusData.services.map(s => ({ name: s.name, id: s.id, status: s.status })));
                     }
                 } else {
-                    console.log('Timeline: statusData not available yet');
+                    console.warn('Timeline: statusData not available yet');
                 }
 
                 // Determine current status badge based on real-time status
@@ -554,7 +571,14 @@
             if (refreshTimer) {
                 clearInterval(refreshTimer);
             }
-            refreshTimer = setInterval(loadStatus, REFRESH_INTERVAL);
+            // Auto-refresh all data: status, timeline, and incidents
+            refreshTimer = setInterval(() => {
+                loadStatus();
+                loadIncidents();
+                if (VIEW_MODE === 'timeline' || VIEW_MODE === 'both') {
+                    loadTimeline();
+                }
+            }, REFRESH_INTERVAL);
         }
 
         // Stop auto-refresh
@@ -570,7 +594,12 @@
             if (document.hidden) {
                 stopAutoRefresh();
             } else {
+                // Refresh all data when tab becomes visible again
                 loadStatus();
+                loadIncidents();
+                if (VIEW_MODE === 'timeline' || VIEW_MODE === 'both') {
+                    loadTimeline();
+                }
                 startAutoRefresh();
             }
         });

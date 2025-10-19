@@ -1543,6 +1543,8 @@ input[type="checkbox"]:checked::before {
     align-items: center;
     gap: 10px;
     flex: 1;
+    min-width: 0; /* Allow flexbox to shrink below content size */
+    overflow: hidden; /* Contain overflowing text */
 }
 
 /* Network Port LED Indicator */
@@ -1627,6 +1629,7 @@ input[type="checkbox"]:checked::before {
     display: flex !important;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0; /* Prevent status badge from being squeezed */
 }
 
 .compact-card-footer {
@@ -1788,7 +1791,8 @@ body.light-mode .uptime-bar-container {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 100%;
+    flex: 1; /* Take available space but allow shrinking */
+    min-width: 0; /* Allow shrinking below content size */
 }
 
 .ack-icon {
@@ -3720,7 +3724,7 @@ header {
     gap: 6px;
     height: 48px;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 10px;
+    border-radius: 4px; /* More square to match public dashboard */
     overflow: visible;
     border: 1px solid var(--border-light);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -3730,7 +3734,7 @@ header {
 .timeline-segment {
     flex: 1;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 8px;
+    border-radius: 2px; /* Square corners to match public dashboard */
     position: relative;
     min-width: 4px;
     transform-origin: center bottom;
