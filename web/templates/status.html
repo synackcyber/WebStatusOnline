@@ -4,21 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ token_name }} - Status</title>
-    <link rel="stylesheet" href="/static/css/status.css?v=1760815875">
+    <title>{% if token_name and token_name.upper() != 'NONE' %}{{ token_name }} - Status{% else %}Status Page{% endif %}</title>
+    <link rel="stylesheet" href="/static/css/status.css?v=1760818300&bust={{ range(1, 9999999) | random }}">
 </head>
 <body>
     <div class="status-page">
-        <!-- Theme Toggle -->
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <svg class="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-        </button>
-
         <!-- Floating Dashboard Link - Hidden since we now have tabs -->
         <a href="/public/{{ token }}/dashboard" class="floating-dashboard-link" style="display: none;">
             <span class="link-text">Card View</span>
@@ -93,6 +83,22 @@
                 </div>
             </section>
             {% endif %}
+
+            <!-- Recent Incidents Section -->
+            {% if has_targets %}
+            <section class="incidents-section" id="incidentsSection">
+                <h2 class="incidents-title">Recent Incidents (Past 14 Days)</h2>
+                <div class="incidents-container" id="incidentsContainer">
+                    <div class="loading-placeholder">
+                        <div class="spinner"></div>
+                        <p>Loading incidents...</p>
+                    </div>
+                </div>
+                <button class="show-more-btn" id="showMoreBtn" style="display: none;">
+                    Show More
+                </button>
+            </section>
+            {% endif %}
         </main>
 
         <footer class="status-footer">
@@ -103,6 +109,14 @@
                         <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
                     </svg>
                 </span>
+                <button class="theme-toggle-inline" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+                    <svg class="sun-icon" width="14" height="14" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg class="moon-icon" width="14" height="14" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
             </p>
         </footer>
     </div>
@@ -111,6 +125,7 @@
         const TOKEN = '{{ token }}';
         const STATUS_API = `/api/v1/public/${TOKEN}/status`;
         const HISTORY_API = `/api/v1/public/${TOKEN}/history`;
+        const INCIDENTS_API = `/api/v1/public/${TOKEN}/incidents`;
         const REFRESH_INTERVAL = 30000; // 30 seconds
         const VIEW_MODE = '{{ view_mode }}'; // 'both', 'timeline', or 'cards'
         let refreshTimer = null;
@@ -421,6 +436,99 @@
             }
         }
 
+        // Store all incidents for show more functionality
+        let allIncidents = [];
+        let showingAllIncidents = false;
+        const INITIAL_INCIDENT_COUNT = 10;
+
+        // Load and render incidents
+        async function loadIncidents() {
+            try {
+                const response = await fetch(`${INCIDENTS_API}?days=14`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                allIncidents = data.incidents || [];
+                renderIncidents(allIncidents, false);
+
+            } catch (error) {
+                console.error('Error loading incidents:', error);
+                const container = document.getElementById('incidentsContainer');
+                container.innerHTML = `
+                    <div class="no-incidents">
+                        <p>Unable to load incident data.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render incidents list
+        function renderIncidents(incidents, showAll = false) {
+            const container = document.getElementById('incidentsContainer');
+            const showMoreBtn = document.getElementById('showMoreBtn');
+
+            if (!incidents || incidents.length === 0) {
+                container.innerHTML = `
+                    <div class="no-incidents">
+                        <p>No incidents in the past 14 days</p>
+                    </div>
+                `;
+                showMoreBtn.style.display = 'none';
+                return;
+            }
+
+            // Determine how many incidents to show
+            const incidentsToShow = showAll ? incidents : incidents.slice(0, INITIAL_INCIDENT_COUNT);
+
+            const incidentItems = incidentsToShow.map(incident => {
+                const statusClass = incident.status === 'resolved' ? 'resolved' : 'ongoing';
+                const statusText = incident.status === 'resolved' ? 'Resolved' : 'Ongoing';
+                const statusIcon = incident.status === 'resolved' ? '✓' : '⚠';
+
+                return `
+                    <div class="incident-item ${statusClass}">
+                        <div class="incident-header">
+                            <div class="incident-status-indicator ${statusClass}">
+                                <span class="incident-icon">${statusIcon}</span>
+                            </div>
+                            <div class="incident-details">
+                                <h3 class="incident-title">${escapeHtml(incident.title)}</h3>
+                                <div class="incident-meta">
+                                    <span class="incident-time">${formatDateTime(incident.started_at)}</span>
+                                    <span class="incident-separator">•</span>
+                                    <span class="incident-duration">${escapeHtml(incident.duration)}</span>
+                                    <span class="incident-separator">•</span>
+                                    <span class="incident-status ${statusClass}">${statusText}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = incidentItems;
+
+            // Show/hide "Show More" button
+            if (incidents.length > INITIAL_INCIDENT_COUNT && !showAll) {
+                showMoreBtn.style.display = 'block';
+                showMoreBtn.textContent = `Show More (${incidents.length - INITIAL_INCIDENT_COUNT} more)`;
+            } else if (incidents.length > INITIAL_INCIDENT_COUNT && showAll) {
+                showMoreBtn.style.display = 'block';
+                showMoreBtn.textContent = 'Show Less';
+            } else {
+                showMoreBtn.style.display = 'none';
+            }
+        }
+
+        // Toggle show more/less incidents
+        function toggleShowMore() {
+            showingAllIncidents = !showingAllIncidents;
+            renderIncidents(allIncidents, showingAllIncidents);
+        }
+
         // Show error message
         function showError(message) {
             const container = document.getElementById('timelineGrid');
@@ -500,6 +608,7 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadStatus();
+            loadIncidents();
 
             // Load data based on view mode
             if (VIEW_MODE === 'timeline' || VIEW_MODE === 'both') {
@@ -534,6 +643,12 @@
                     loadTimeline();
                 });
             });
+
+            // Set up Show More button for incidents
+            const showMoreBtn = document.getElementById('showMoreBtn');
+            if (showMoreBtn) {
+                showMoreBtn.addEventListener('click', toggleShowMore);
+            }
         });
     </script>
 </body>

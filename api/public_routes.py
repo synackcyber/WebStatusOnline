@@ -589,6 +589,168 @@ def aggregate_history_into_buckets(history_records: List[Dict], start_time: date
     return result
 
 
+@router.get("/api/v1/public/{token}/incidents")
+async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
+    """
+    Public API endpoint - Returns recent incidents from the alert log.
+
+    Query parameters:
+    - days: Number of days to look back (default: 7, max: 90)
+
+    Returns list of incidents with start time, duration, and status.
+    """
+    try:
+        # Validate token format
+        if not token or len(token) < 20:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invalid token"
+            )
+
+        # Check rate limit
+        if not check_rate_limit(token):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Please try again later."
+            )
+
+        # Validate token exists and is enabled
+        token_data = await db.get_public_token(token)
+        if not token_data or not token_data.get('enabled', 0):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invalid token"
+            )
+
+        # Track access
+        await db.update_token_access(token)
+
+        # Limit days parameter
+        days = max(1, min(days, 90))
+
+        # Calculate time range
+        cutoff_time = datetime.utcnow() - timedelta(days=days)
+
+        # Get alert logs for public targets only
+        public_targets = await db.get_public_targets()
+        public_target_ids = {t['id'] for t in public_targets}
+
+        # Get all recent alerts
+        all_alerts = await db.get_alert_log(limit=1000)
+
+        # Filter to public targets and time range, and group into incidents
+        # Process alerts in chronological order (oldest first) to properly track incidents
+        # Build a map to track incidents per target
+        incidents_by_target = {}
+
+        # Reverse the list to process oldest first
+        for alert in reversed(all_alerts):
+            # Skip if not a public target
+            if alert['target_id'] not in public_target_ids:
+                continue
+
+            # Parse timestamp
+            try:
+                alert_time = datetime.fromisoformat(alert['timestamp'].replace('Z', '+00:00'))
+                if alert_time.tzinfo is None:
+                    alert_time = alert_time.replace(tzinfo=None)
+
+                # Skip if outside time range
+                if alert_time < cutoff_time:
+                    continue
+            except (ValueError, KeyError):
+                continue
+
+            # Get target name
+            target = next((t for t in public_targets if t['id'] == alert['target_id']), None)
+            if not target:
+                continue
+
+            target_name = target.get('public_name') or target.get('name', 'Unknown Service')
+            target_id = alert['target_id']
+            event_type = alert.get('event_type', '')
+
+            if event_type == 'threshold_reached':
+                # Check if target already has an ongoing incident
+                if target_id not in incidents_by_target or incidents_by_target[target_id].get('resolved_at'):
+                    # Start a new incident for this target
+                    incident = {
+                        'id': alert.get('id'),
+                        'target_id': target_id,
+                        'target_name': target_name,
+                        'title': f"Outage: {target_name}",
+                        'started_at': alert['timestamp'],
+                        'resolved_at': None,
+                        'status': 'investigating',
+                        'message': alert.get('message', '')
+                    }
+                    incidents_by_target[target_id] = incident
+
+            elif event_type == 'recovered':
+                # Resolve the current incident for this target if it exists
+                if target_id in incidents_by_target and not incidents_by_target[target_id].get('resolved_at'):
+                    incidents_by_target[target_id]['resolved_at'] = alert['timestamp']
+                    incidents_by_target[target_id]['status'] = 'resolved'
+
+        # Convert to list and sort by start time (newest first)
+        incidents = list(incidents_by_target.values())
+        incidents.sort(key=lambda x: x['started_at'], reverse=True)
+
+        # Calculate durations and format incidents
+        formatted_incidents = []
+        for incident in incidents:
+            started_at = datetime.fromisoformat(incident['started_at'].replace('Z', '+00:00'))
+
+            if incident['resolved_at']:
+                resolved_at = datetime.fromisoformat(incident['resolved_at'].replace('Z', '+00:00'))
+                duration_seconds = (resolved_at - started_at).total_seconds()
+            else:
+                # Still ongoing
+                duration_seconds = (datetime.utcnow().replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
+                incident['status'] = 'ongoing'
+
+            # Format duration
+            if duration_seconds < 60:
+                duration_str = f"{int(duration_seconds)}s"
+            elif duration_seconds < 3600:
+                minutes = int(duration_seconds / 60)
+                duration_str = f"{minutes}m"
+            elif duration_seconds < 86400:
+                hours = int(duration_seconds / 3600)
+                minutes = int((duration_seconds % 3600) / 60)
+                duration_str = f"{hours}h {minutes}m" if minutes > 0 else f"{hours}h"
+            else:
+                days_count = int(duration_seconds / 86400)
+                hours = int((duration_seconds % 86400) / 3600)
+                duration_str = f"{days_count}d {hours}h" if hours > 0 else f"{days_count}d"
+
+            formatted_incidents.append({
+                'id': incident['id'],
+                'title': incident['title'],
+                'target_name': incident['target_name'],
+                'started_at': incident['started_at'],
+                'resolved_at': incident['resolved_at'],
+                'duration': duration_str,
+                'status': incident['status']
+            })
+
+        return {
+            'success': True,
+            'incidents': formatted_incidents,
+            'count': len(formatted_incidents),
+            'days': days
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching public incidents: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to fetch incidents"
+        )
+
+
 @router.get("/api/v1/public/{token}/history")
 async def get_public_history(token: str, range: str = "24h") -> Dict[str, Any]:
     """
