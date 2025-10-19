@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>{% if token_name and token_name.upper() != 'NONE' %}{{ token_name }} - Status{% else %}Status Page{% endif %}</title>
-    <link rel="stylesheet" href="/static/css/status.css?v=1760818500&bust={{ range(1, 9999999) | random }}">
+    <link rel="stylesheet" href="/static/css/status.css?v=1760819300&bust={{ range(1, 9999999) | random }}">
 </head>
 <body>
     <div class="status-page">
@@ -280,7 +280,6 @@
 
                 // Generate timeline pills from bucketed history
                 let bars = '';
-                let currentStatus = 'unknown';
                 if (target.history && target.history.length > 0) {
                     bars = target.history.map(point => {
                         const status = point.status || 'unknown';
@@ -300,20 +299,26 @@
 
                         return `<div class="timeline-pill status-${status}" title="${tooltip}"></div>`;
                     }).join('');
-
-                    // Get the most recent status from buckets that have data (checks_count > 0)
-                    // Iterate backwards to find the last bucket with actual data
-                    for (let i = target.history.length - 1; i >= 0; i--) {
-                        if (target.history[i].checks_count > 0) {
-                            currentStatus = target.history[i].status || 'unknown';
-                            break;
-                        }
-                    }
                 } else {
                     bars = '<div class="timeline-pill status-unknown" style="flex: 1;"></div>';
                 }
 
-                // Determine current status badge based on most recent data
+                // Get current status from the statusData (real-time status from /status API)
+                let currentStatus = 'unknown';
+                if (statusData && statusData.services) {
+                    const service = statusData.services.find(s => s.name === target.name || s.id === target.id);
+                    if (service) {
+                        currentStatus = service.status || 'unknown';
+                        console.log(`Timeline: Matched service "${target.name}" with status "${currentStatus}"`);
+                    } else {
+                        console.log(`Timeline: Could not match target "${target.name}" (id: ${target.id})`);
+                        console.log('Available services:', statusData.services.map(s => ({ name: s.name, id: s.id })));
+                    }
+                } else {
+                    console.log('Timeline: statusData not available yet');
+                }
+
+                // Determine current status badge based on real-time status
                 const statusBadge = currentStatus === 'up'
                     ? '<span class="status-badge operational">UP</span>'
                     : currentStatus === 'down'
@@ -606,8 +611,9 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadStatus();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load status first, then timeline (to ensure statusData is available)
+            await loadStatus();
             loadIncidents();
 
             // Load data based on view mode

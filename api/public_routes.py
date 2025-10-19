@@ -638,10 +638,10 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
         # Get all recent alerts
         all_alerts = await db.get_alert_log(limit=1000)
 
-        # Filter to public targets and time range, and group into incidents
-        # Process alerts in chronological order (oldest first) to properly track incidents
-        # Build a map to track incidents per target
-        incidents_by_target = {}
+        # Filter to public targets and time range, and build incident list
+        # Process alerts in chronological order (oldest first) to properly pair incidents
+        incidents_list = []
+        current_incidents = {}  # Track ongoing incidents per target
 
         # Reverse the list to process oldest first
         for alert in reversed(all_alerts):
@@ -672,7 +672,7 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
 
             if event_type == 'threshold_reached':
                 # Check if target already has an ongoing incident
-                if target_id not in incidents_by_target or incidents_by_target[target_id].get('resolved_at'):
+                if target_id not in current_incidents or current_incidents[target_id].get('resolved_at'):
                     # Start a new incident for this target
                     incident = {
                         'id': alert.get('id'),
@@ -684,21 +684,21 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
                         'status': 'investigating',
                         'message': alert.get('message', '')
                     }
-                    incidents_by_target[target_id] = incident
+                    current_incidents[target_id] = incident
+                    incidents_list.append(incident)
 
             elif event_type == 'recovered':
                 # Resolve the current incident for this target if it exists
-                if target_id in incidents_by_target and not incidents_by_target[target_id].get('resolved_at'):
-                    incidents_by_target[target_id]['resolved_at'] = alert['timestamp']
-                    incidents_by_target[target_id]['status'] = 'resolved'
+                if target_id in current_incidents and not current_incidents[target_id].get('resolved_at'):
+                    current_incidents[target_id]['resolved_at'] = alert['timestamp']
+                    current_incidents[target_id]['status'] = 'resolved'
 
-        # Convert to list and sort by start time (newest first)
-        incidents = list(incidents_by_target.values())
-        incidents.sort(key=lambda x: x['started_at'], reverse=True)
+        # Sort by start time (newest first)
+        incidents_list.sort(key=lambda x: x['started_at'], reverse=True)
 
         # Calculate durations and format incidents
         formatted_incidents = []
-        for incident in incidents:
+        for incident in incidents_list:
             started_at = datetime.fromisoformat(incident['started_at'].replace('Z', '+00:00'))
 
             if incident['resolved_at']:

@@ -119,34 +119,25 @@
         background: #f9fafb !important;
     }
 
-    /* Light mode: lighter background with green glow for operational */
+    /* Light mode: flat professional operational */
     :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.operational) {
         background: rgba(240, 253, 244, 0.9);
-        border: 2px solid rgba(5, 150, 105, 0.3);
-        box-shadow:
-            0 8px 32px rgba(5, 150, 105, 0.15),
-            0 0 60px rgba(5, 150, 105, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+        box-shadow: none;
     }
 
-    /* Light mode: lighter background with orange glow for degraded */
+    /* Light mode: flat professional degraded */
     :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.degraded) {
         background: rgba(255, 251, 235, 0.9);
-        border: 2px solid rgba(217, 119, 6, 0.3);
-        box-shadow:
-            0 8px 32px rgba(217, 119, 6, 0.15),
-            0 0 60px rgba(217, 119, 6, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(217, 119, 6, 0.2);
+        box-shadow: none;
     }
 
-    /* Light mode: lighter background with red glow for outage */
+    /* Light mode: flat professional outage */
     :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.down) {
         background: rgba(254, 242, 242, 0.9);
-        border: 2px solid rgba(220, 38, 38, 0.3);
-        box-shadow:
-            0 8px 32px rgba(220, 38, 38, 0.15),
-            0 0 60px rgba(220, 38, 38, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        box-shadow: none;
     }
 
     /* Light mode: lighter filter buttons */
@@ -258,34 +249,25 @@
     background: #f9fafb !important;
 }
 
-/* Light mode: lighter background with green glow for operational */
+/* Light mode: flat professional operational */
 :root[data-theme="light"] .overall-status:has(.status-indicator.operational) {
     background: rgba(240, 253, 244, 0.9);
-    border: 2px solid rgba(5, 150, 105, 0.3);
-    box-shadow:
-        0 8px 32px rgba(5, 150, 105, 0.15),
-        0 0 60px rgba(5, 150, 105, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    box-shadow: none;
 }
 
-/* Light mode: lighter background with orange glow for degraded */
+/* Light mode: flat professional degraded */
 :root[data-theme="light"] .overall-status:has(.status-indicator.degraded) {
     background: rgba(255, 251, 235, 0.9);
-    border: 2px solid rgba(217, 119, 6, 0.3);
-    box-shadow:
-        0 8px 32px rgba(217, 119, 6, 0.15),
-        0 0 60px rgba(217, 119, 6, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    box-shadow: none;
 }
 
-/* Light mode: lighter background with red glow for outage */
+/* Light mode: flat professional outage */
 :root[data-theme="light"] .overall-status:has(.status-indicator.down) {
     background: rgba(254, 242, 242, 0.9);
-    border: 2px solid rgba(220, 38, 38, 0.3);
-    box-shadow:
-        0 8px 32px rgba(220, 38, 38, 0.15),
-        0 0 60px rgba(220, 38, 38, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    box-shadow: none;
 }
 
 /* Light mode: lighter filter buttons */
@@ -479,56 +461,42 @@ body::after {
     display: block;
 }
 
-/* Overall Status Indicator */
+/* Overall Status Indicator - Flat Professional Design */
 .overall-status {
     display: inline-block;
     margin-bottom: 24px;
     padding: 20px 48px;
     border-radius: 0;
-    background: rgba(17, 24, 39, 0.8);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid rgba(0, 240, 255, 0.3);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 40px rgba(0, 240, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid var(--border);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
-    animation: statusPulse 4s ease-in-out infinite;
+    animation: none;
 }
 
-/* Light background with green glow for operational status */
+/* Flat professional design - operational status */
 .overall-status:has(.status-indicator.operational) {
     background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(5, 150, 105, 0.4);
-    box-shadow:
-        0 8px 32px rgba(5, 150, 105, 0.25),
-        0 0 60px rgba(5, 150, 105, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    animation: operationalPulse 4s ease-in-out infinite;
+    border: 1px solid rgba(5, 150, 105, 0.3);
+    box-shadow: none;
+    animation: none;
 }
 
-/* Light background with orange glow for degraded/partial outage */
+/* Flat professional design - degraded/partial outage */
 .overall-status:has(.status-indicator.degraded) {
     background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(217, 119, 6, 0.4);
-    box-shadow:
-        0 8px 32px rgba(217, 119, 6, 0.25),
-        0 0 60px rgba(217, 119, 6, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    animation: degradedPulse 3s ease-in-out infinite;
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    box-shadow: none;
+    animation: none;
 }
 
-/* Light background with red glow for outage status */
+/* Flat professional design - outage status */
 .overall-status:has(.status-indicator.down) {
     background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(220, 38, 38, 0.4);
-    box-shadow:
-        0 8px 32px rgba(220, 38, 38, 0.25),
-        0 0 60px rgba(220, 38, 38, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    animation: outagePulse 2s ease-in-out infinite;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    box-shadow: none;
+    animation: none;
 }
 
 @keyframes operationalPulse {
@@ -605,21 +573,20 @@ body::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
     border: 2px solid;
-    font-size: 14px;
+    font-size: 0;
     font-weight: bold;
     line-height: 1;
+    color: transparent;
 }
 
-/* Status indicator variants */
+/* Status indicator variants - Clean, no effects */
 .status-indicator.operational .status-dot {
     border-color: var(--success);
-    color: var(--success);
-    background: transparent;
-    box-shadow: 0 0 10px var(--success-glow);
+    background: var(--success);
 }
 
 .status-indicator.operational .status-text {
@@ -628,9 +595,7 @@ body::after {
 
 .status-indicator.degraded .status-dot {
     border-color: var(--warning);
-    color: var(--warning);
-    background: transparent;
-    box-shadow: 0 0 10px var(--warning-glow);
+    background: var(--warning);
 }
 
 .status-indicator.degraded .status-text {
@@ -639,10 +604,7 @@ body::after {
 
 .status-indicator.down .status-dot {
     border-color: var(--danger);
-    color: var(--danger);
-    background: transparent;
-    box-shadow: 0 0 10px var(--danger-glow);
-    animation: pulse 2s ease-in-out infinite;
+    background: var(--danger);
 }
 
 .status-indicator.down .status-text {
