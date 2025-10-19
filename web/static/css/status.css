@@ -148,6 +148,25 @@
             0 0 60px rgba(220, 38, 38, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
+
+    /* Light mode: lighter filter buttons */
+    :root:not([data-theme="dark"]) .filter-btn {
+        background: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        color: var(--text-secondary) !important;
+    }
+
+    :root:not([data-theme="dark"]) .filter-btn:hover {
+        background: #f9fafb !important;
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+    }
+
+    :root:not([data-theme="dark"]) .filter-btn.active {
+        background: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary) !important;
+    }
 }
 
 /* Manual light mode override */
@@ -267,6 +286,25 @@
         0 8px 32px rgba(220, 38, 38, 0.15),
         0 0 60px rgba(220, 38, 38, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Light mode: lighter filter buttons */
+:root[data-theme="light"] .filter-btn {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    color: var(--text-secondary) !important;
+}
+
+:root[data-theme="light"] .filter-btn:hover {
+    background: #f9fafb !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+:root[data-theme="light"] .filter-btn.active {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
 }
 
 /* ============================================================================
