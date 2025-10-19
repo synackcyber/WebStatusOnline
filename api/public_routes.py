@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from typing import Dict, Any, List, Optional
 import secrets
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 import time
 
@@ -211,7 +211,7 @@ async def get_public_status(token: str) -> Dict[str, Any]:
         return {
             'overall_status': overall_status,
             'services': services,
-            'last_updated': datetime.now().isoformat(),
+            'last_updated': datetime.now(timezone.utc).isoformat(),
             'service_count': len(services)
         }
 
@@ -629,7 +629,7 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
         days = max(1, min(days, 90))
 
         # Calculate time range
-        cutoff_time = datetime.utcnow() - timedelta(days=days)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Get alert logs for public targets only
         public_targets = await db.get_public_targets()
@@ -706,7 +706,7 @@ async def get_public_incidents(token: str, days: int = 7) -> Dict[str, Any]:
                 duration_seconds = (resolved_at - started_at).total_seconds()
             else:
                 # Still ongoing
-                duration_seconds = (datetime.utcnow().replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
+                duration_seconds = (datetime.now(timezone.utc).replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
                 incident['status'] = 'ongoing'
 
             # Format duration
@@ -799,7 +799,7 @@ async def get_public_history(token: str, range: str = "24h") -> Dict[str, Any]:
         bucket_minutes = config['bucket_minutes']
 
         # Calculate time range (database timestamps are in UTC format)
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(hours=hours)
 
         # Get public targets

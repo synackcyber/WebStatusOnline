@@ -150,11 +150,39 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Clean background - no overlays or gradients */
-body::before,
-body::after {
-    display: none;
+/* Tech background with grid pattern */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.15) 1px, transparent 0);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
 }
+
+/* Atmospheric gradient overlay */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        ellipse at top,
+        rgba(37, 99, 235, 0.1) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+/* Background effects enabled for tech aesthetic */
 
 .container {
     max-width: 1400px;
@@ -170,6 +198,8 @@ header {
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 2px solid var(--border);
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 header h1 {
@@ -546,6 +576,8 @@ header h1 {
     border-radius: 8px;
     padding: 15px;
     transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 .target-card.collapsed {
@@ -558,20 +590,24 @@ header h1 {
 }
 
 .target-card:hover {
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .target-card.status-up {
     border-left: 4px solid var(--success);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), -2px 0 12px rgba(5, 150, 105, 0.15);
 }
 
 .target-card.status-down {
     border-left: 4px solid var(--danger);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), -2px 0 12px rgba(220, 38, 38, 0.15);
 }
 
 .target-card.status-unknown {
     border-left: 4px solid var(--unknown);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), -2px 0 12px rgba(100, 116, 139, 0.15);
 }
 
 .target-header {
@@ -1339,32 +1375,47 @@ input[type="checkbox"]:checked::before {
 .compact-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--border);
+    border-left: 3px solid var(--border);
     border-radius: 8px;
     padding: 20px;
     cursor: pointer;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
     position: relative;
-    box-shadow: 0 1px 3px var(--shadow);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Remove scanline effect */
+/* Tech scanline effect - enabled */
 .compact-card::before {
-    display: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(59, 130, 246, 0.03) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.3;
 }
 
 .compact-card:hover {
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.15);
     border-left-color: var(--primary);
+    transform: translateY(-2px);
 }
 
-/* Status: UP - Clean Green */
+/* Status: UP - Tech Green with Glow */
 .compact-card.status-up {
     border-left-color: var(--success);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), -2px 0 12px rgba(5, 150, 105, 0.2);
 }
 
 .compact-card.status-up:hover {
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), -2px 0 20px rgba(5, 150, 105, 0.3);
 }
 
 /* Status: DOWN - Red Glow (static for acknowledged, pulsing for unacknowledged) */
