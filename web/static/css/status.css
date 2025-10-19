@@ -119,6 +119,26 @@
         background: #f9fafb !important;
     }
 
+    /* Light mode: lighter background with green glow for operational */
+    :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.operational) {
+        background: rgba(240, 253, 244, 0.9);
+        border: 2px solid rgba(5, 150, 105, 0.3);
+        box-shadow:
+            0 8px 32px rgba(5, 150, 105, 0.15),
+            0 0 60px rgba(5, 150, 105, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    /* Light mode: lighter background with orange glow for degraded */
+    :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.degraded) {
+        background: rgba(255, 251, 235, 0.9);
+        border: 2px solid rgba(217, 119, 6, 0.3);
+        box-shadow:
+            0 8px 32px rgba(217, 119, 6, 0.15),
+            0 0 60px rgba(217, 119, 6, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
     /* Light mode: lighter background with red glow for outage */
     :root:not([data-theme="dark"]) .overall-status:has(.status-indicator.down) {
         background: rgba(254, 242, 242, 0.9);
@@ -217,6 +237,26 @@
 /* Also apply light mode to timeline rows */
 :root[data-theme="light"] .timeline-row:hover {
     background: #f9fafb !important;
+}
+
+/* Light mode: lighter background with green glow for operational */
+:root[data-theme="light"] .overall-status:has(.status-indicator.operational) {
+    background: rgba(240, 253, 244, 0.9);
+    border: 2px solid rgba(5, 150, 105, 0.3);
+    box-shadow:
+        0 8px 32px rgba(5, 150, 105, 0.15),
+        0 0 60px rgba(5, 150, 105, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Light mode: lighter background with orange glow for degraded */
+:root[data-theme="light"] .overall-status:has(.status-indicator.degraded) {
+    background: rgba(255, 251, 235, 0.9);
+    border: 2px solid rgba(217, 119, 6, 0.3);
+    box-shadow:
+        0 8px 32px rgba(217, 119, 6, 0.15),
+        0 0 60px rgba(217, 119, 6, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* Light mode: lighter background with red glow for outage */
@@ -420,6 +460,28 @@ body::after {
     animation: statusPulse 4s ease-in-out infinite;
 }
 
+/* Light background with green glow for operational status */
+.overall-status:has(.status-indicator.operational) {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(5, 150, 105, 0.4);
+    box-shadow:
+        0 8px 32px rgba(5, 150, 105, 0.25),
+        0 0 60px rgba(5, 150, 105, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    animation: operationalPulse 4s ease-in-out infinite;
+}
+
+/* Light background with orange glow for degraded/partial outage */
+.overall-status:has(.status-indicator.degraded) {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(217, 119, 6, 0.4);
+    box-shadow:
+        0 8px 32px rgba(217, 119, 6, 0.25),
+        0 0 60px rgba(217, 119, 6, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    animation: degradedPulse 3s ease-in-out infinite;
+}
+
 /* Light background with red glow for outage status */
 .overall-status:has(.status-indicator.down) {
     background: rgba(255, 255, 255, 0.08);
@@ -429,6 +491,36 @@ body::after {
         0 0 60px rgba(220, 38, 38, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
     animation: outagePulse 2s ease-in-out infinite;
+}
+
+@keyframes operationalPulse {
+    0%, 100% {
+        box-shadow:
+            0 8px 32px rgba(5, 150, 105, 0.25),
+            0 0 60px rgba(5, 150, 105, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 12px 40px rgba(5, 150, 105, 0.35),
+            0 0 80px rgba(5, 150, 105, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+}
+
+@keyframes degradedPulse {
+    0%, 100% {
+        box-shadow:
+            0 8px 32px rgba(217, 119, 6, 0.25),
+            0 0 60px rgba(217, 119, 6, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    50% {
+        box-shadow:
+            0 12px 40px rgba(217, 119, 6, 0.35),
+            0 0 80px rgba(217, 119, 6, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
 }
 
 @keyframes outagePulse {
