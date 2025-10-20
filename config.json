@@ -3,7 +3,7 @@
   "check_interval": 60,
   "alert_repeat_interval": 300,
   "audio_enabled": true,
-  "webhook_url": "",
+  "webhook_url": "https://webhook-test.com/3f4c6f605e01bc5d58255a84f3e69a70",
   "webhook_enabled": true,
   "web_port": 8000,
   "ping_timeout": 3,

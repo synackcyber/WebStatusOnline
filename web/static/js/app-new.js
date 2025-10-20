@@ -3428,18 +3428,35 @@ const app = new WebStatusApp();
 // Navbar Scroll Effect
 // ============================================================================
 
-// Handle navbar scroll effect - changes from transparent to solid on scroll
+// Handle navbar scroll effect - transparent by default, shows/hides on scroll
 const navbar = document.querySelector('.top-nav-bar');
+let lastScrollTop = 0;
+let scrollTimeout;
 
 function handleScroll() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    // Add 'scrolled' class when scrolled down more than 50px
-    if (scrollTop > 50) {
-        navbar.classList.add('scrolled');
-    } else {
+    // Clear previous timeout
+    clearTimeout(scrollTimeout);
+
+    // If at the top, make navbar transparent
+    if (scrollTop <= 10) {
         navbar.classList.remove('scrolled');
+        navbar.classList.remove('hidden');
+    } else {
+        // Scrolling down - hide navbar
+        if (scrollTop > lastScrollTop && scrollTop > 70) {
+            navbar.classList.add('hidden');
+            navbar.classList.add('scrolled');
+        }
+        // Scrolling up - show navbar with solid background
+        else if (scrollTop < lastScrollTop) {
+            navbar.classList.remove('hidden');
+            navbar.classList.add('scrolled');
+        }
     }
+
+    lastScrollTop = scrollTop;
 }
 
 // Listen to window scroll events
