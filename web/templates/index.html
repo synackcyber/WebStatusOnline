@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebStatus - System Monitor</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=1760817531">
+    <link rel="stylesheet" href="/static/css/style.css?v=1760817532">
 </head>
 <body>
     <!-- Hamburger Menu Sidebar -->
@@ -21,8 +21,8 @@
             <button class="sidebar-nav-item" data-tab="uptime">
                 <span class="nav-label">Timeline</span>
             </button>
-            <button class="sidebar-nav-item" data-tab="sharing">
-                <span class="nav-label">Status Page</span>
+            <button class="sidebar-nav-item" data-tab="incidents">
+                <span class="nav-label">Incidents</span>
             </button>
             <button class="sidebar-nav-item" data-tab="events">
                 <span class="nav-label">Event Log</span>
@@ -268,6 +268,31 @@
             </div>
         </div>
 
+        <!-- Incidents Tab -->
+        <div class="tab-content" id="incidents">
+            <div class="incidents-dashboard">
+                <!-- Header -->
+                <div class="incidents-header">
+                    <h2>Recent Incidents</h2>
+                    <div class="incidents-filters">
+                        <button class="incidents-filter-btn" data-days="7">7 Days</button>
+                        <button class="incidents-filter-btn active" data-days="14">14 Days</button>
+                        <button class="incidents-filter-btn" data-days="30">30 Days</button>
+                    </div>
+                </div>
+
+                <!-- Incidents Container -->
+                <div class="incidents-container" id="incidentsContainer">
+                    <div class="loading">Loading incidents...</div>
+                </div>
+
+                <!-- Show More Button -->
+                <button class="show-more-btn" id="incidentsShowMoreBtn" style="display: none;">
+                    Show More
+                </button>
+            </div>
+        </div>
+
         <!-- Discovery Tab -->
         <div class="tab-content" id="discovery">
             <div class="discovery-container">
@@ -330,92 +355,6 @@
             </div>
         </div>
 
-        <!-- Sharing Tab -->
-        <div class="tab-content" id="sharing">
-            <div class="sharing-section">
-                <!-- Page Header Card (Like Event Log) -->
-                <div class="settings-card page-title-card">
-                    <div class="event-log-header">
-                        <div>
-                            <h2>Public Status Page</h2>
-                            <p class="page-subtitle">Share monitoring status with your team or customers. No authentication required.</p>
-                        </div>
-                        <div class="event-log-controls">
-                            <button class="btn btn-primary" id="generateTokenBtn">
-                                <span class="icon-plus"></span> Generate New Link
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Public Links Section -->
-                <div class="settings-card">
-                    <div class="card-header">
-                        <h3>Public Links</h3>
-                        <span class="card-badge" id="linksCount">0 links</span>
-                    </div>
-                    <p class="card-description">
-                        Shareable links that display your monitoring status. Each link can be toggled independently.
-                    </p>
-                    <div class="public-links-container" id="publicLinksContainer">
-                        <!-- Public links will be rendered here by JavaScript -->
-                        <div class="loading-placeholder">
-                            <div class="spinner-small"></div>
-                            <p>Loading public links...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide-out Panel for Link Configuration -->
-            <div class="slide-out-overlay" id="linkConfigPanel" style="display: none;">
-                <div class="slide-out-panel">
-                    <div class="slide-out-header">
-                        <h2>Configure Public Link</h2>
-                        <button class="slide-out-close" onclick="app.closeLinkConfigPanel()">×</button>
-                    </div>
-
-                    <div class="slide-out-body">
-                        <!-- Link Generation Form -->
-                        <div class="slide-out-section">
-                            <h3>Link Details</h3>
-                            <div class="form-group">
-                                <label for="panelTokenName">Link Name (optional)</label>
-                                <input type="text" id="panelTokenName" class="form-control" placeholder="e.g., Production Status Page">
-                            </div>
-                            <div class="form-group">
-                                <label for="panelViewMode">View Mode</label>
-                                <select id="panelViewMode" class="form-control">
-                                    <option value="both">Both Views (Timeline + Cards)</option>
-                                    <option value="timeline">Timeline Only</option>
-                                    <option value="cards">Cards Only</option>
-                                </select>
-                                <small class="form-text">Choose which views visitors can see</small>
-                            </div>
-                        </div>
-
-                        <!-- Target Visibility Section -->
-                        <div class="slide-out-section">
-                            <h3>Target Visibility</h3>
-                            <p class="section-description">Select which targets appear on this public page.</p>
-                            <div class="target-visibility-container" id="panelTargetVisibilityContainer">
-                                <!-- Target visibility controls will be rendered here -->
-                                <div class="loading-placeholder">
-                                    <div class="spinner-small"></div>
-                                    <p>Loading targets...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="slide-out-footer">
-                        <button class="btn btn-secondary btn-large" onclick="app.closeLinkConfigPanel()">Cancel</button>
-                        <button class="btn btn-primary btn-large" id="panelGenerateBtn">Generate Link</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Settings Tab -->
         <div class="tab-content" id="settings">
             <!-- System Health Monitor -->
@@ -435,6 +374,82 @@
                     <button class="btn btn-primary" id="refreshHealthBtn">
                         <span class="icon-refresh"></span> Refresh Health Check
                     </button>
+                </div>
+            </div>
+
+            <!-- Status Page Management Section -->
+            <div class="settings-section">
+                <h2>Status Page Management</h2>
+                <p class="settings-description">Create and manage public status page links to share with your team or customers. No authentication required.</p>
+
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3>Public Links</h3>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span class="card-badge" id="linksCount">0 links</span>
+                            <button class="btn btn-primary btn-small" id="generateTokenBtn">
+                                <span class="icon-plus"></span> Generate New Link
+                            </button>
+                        </div>
+                    </div>
+                    <p class="card-description">
+                        Shareable links that display your monitoring status. Each link can be toggled independently.
+                    </p>
+                    <div class="public-links-container" id="publicLinksContainer">
+                        <!-- Public links will be rendered here by JavaScript -->
+                        <div class="loading-placeholder">
+                            <div class="spinner-small"></div>
+                            <p>Loading public links...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide-out Panel for Link Configuration -->
+                <div class="slide-out-overlay" id="linkConfigPanel" style="display: none;">
+                    <div class="slide-out-panel">
+                        <div class="slide-out-header">
+                            <h2>Configure Public Link</h2>
+                            <button class="slide-out-close" onclick="app.closeLinkConfigPanel()">×</button>
+                        </div>
+
+                        <div class="slide-out-body">
+                            <!-- Link Generation Form -->
+                            <div class="slide-out-section">
+                                <h3>Link Details</h3>
+                                <div class="form-group">
+                                    <label for="panelTokenName">Link Name (optional)</label>
+                                    <input type="text" id="panelTokenName" class="form-control" placeholder="e.g., Production Status Page">
+                                </div>
+                                <div class="form-group">
+                                    <label for="panelViewMode">View Mode</label>
+                                    <select id="panelViewMode" class="form-control">
+                                        <option value="both">Both Views (Timeline + Cards)</option>
+                                        <option value="timeline">Timeline Only</option>
+                                        <option value="cards">Cards Only</option>
+                                    </select>
+                                    <small class="form-text">Choose which views visitors can see</small>
+                                </div>
+                            </div>
+
+                            <!-- Target Visibility Section -->
+                            <div class="slide-out-section">
+                                <h3>Target Visibility</h3>
+                                <p class="section-description">Select which targets appear on this public page.</p>
+                                <div class="target-visibility-container" id="panelTargetVisibilityContainer">
+                                    <!-- Target visibility controls will be rendered here -->
+                                    <div class="loading-placeholder">
+                                        <div class="spinner-small"></div>
+                                        <p>Loading targets...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slide-out-footer">
+                            <button class="btn btn-secondary btn-large" onclick="app.closeLinkConfigPanel()">Cancel</button>
+                            <button class="btn btn-primary btn-large" id="panelGenerateBtn">Generate Link</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -801,6 +816,6 @@
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
 
-    <script src="/static/js/app-new.js?v=1760817531"></script>
+    <script src="/static/js/app-new.js?v=1760817532"></script>
 </body>
 </html>

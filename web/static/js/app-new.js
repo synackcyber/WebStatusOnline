@@ -19,6 +19,9 @@ class WebStatusApp {
         this.devicePresets = {}; // Device type presets for auto-configuration
         this.features = {}; // Feature flags (loaded from backend)
         this.dashboardSortMethod = 'smart'; // Default sort method for dashboard
+        this.incidentsDays = 14; // Default: 14 days for incidents
+        this.allIncidents = []; // Store all incidents for show more
+        this.showingAllIncidents = false; // Track show more state
 
         // Audio management for autoplay compatibility
         this.audioElements = {}; // Pre-loaded audio elements
@@ -619,6 +622,19 @@ class WebStatusApp {
                 this.loadDashboard(); // Re-render with new sort
             });
         }
+
+        // Incidents filter buttons
+        document.querySelectorAll('.incidents-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.incidents-filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.incidentsDays = parseInt(e.target.dataset.days);
+                this.loadIncidents();
+            });
+        });
+
+        // Incidents show more button
+        document.getElementById('incidentsShowMoreBtn')?.addEventListener('click', () => this.toggleShowMoreIncidents());
 
         // Uptime filter buttons
         document.querySelectorAll('.uptime-filter-btn').forEach(btn => {
@@ -1319,16 +1335,17 @@ class WebStatusApp {
         if (tab === 'settings') {
             this.loadSettings();
             this.loadHealthDashboard(); // Load health dashboard as it's now part of settings
+            this.initSharingTab(); // Sharing is now part of settings
         } else if (tab === 'uptime') {
 
             this.loadUptimeDashboard();
+        } else if (tab === 'incidents') {
+            this.loadIncidents();
+            this.stopEventLogRefresh();
         } else if (tab === 'events') {
             this.loadEventLog();
             this.startEventLogRefresh();
         } else if (tab === 'dashboard') {
-            this.stopEventLogRefresh();
-        } else if (tab === 'sharing') {
-            this.initSharingTab();
             this.stopEventLogRefresh();
         } else if (tab === 'discovery') {
             this.initDiscoveryTab();
@@ -2274,6 +2291,116 @@ class WebStatusApp {
         };
 
         this.applyEventFilters();
+    }
+
+    // ========================================
+    // INCIDENTS TAB
+    // ========================================
+
+    async loadIncidents() {
+        const container = document.getElementById('incidentsContainer');
+
+        try {
+            const response = await fetch(`${this.apiBase}/incidents?days=${this.incidentsDays}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.allIncidents = data.incidents || [];
+            this.renderIncidents(this.allIncidents, this.showingAllIncidents);
+
+        } catch (error) {
+            console.error('Failed to load incidents:', error);
+            container.innerHTML = this.createEmptyState({
+                icon: '⚠️',
+                title: 'Failed to Load Incidents',
+                description: 'There was an error loading incident data. Please try refreshing.',
+                compact: true
+            });
+        }
+    }
+
+    renderIncidents(incidents, showAll = false) {
+        const container = document.getElementById('incidentsContainer');
+        const showMoreBtn = document.getElementById('incidentsShowMoreBtn');
+        const INITIAL_COUNT = 10;
+
+        if (!incidents || incidents.length === 0) {
+            container.innerHTML = this.createEmptyState({
+                icon: '✅',
+                title: 'No Incidents',
+                description: `No incidents found in the past ${this.incidentsDays} days. All systems running smoothly!`,
+                compact: true
+            });
+            showMoreBtn.style.display = 'none';
+            return;
+        }
+
+        // Show first 10, expand on "Show More"
+        const incidentsToShow = showAll ? incidents : incidents.slice(0, INITIAL_COUNT);
+
+        const html = incidentsToShow.map(incident => {
+            const statusClass = incident.status === 'resolved' ? 'resolved' : 'ongoing';
+            const statusText = incident.status === 'resolved' ? 'Resolved' : 'Ongoing';
+            const statusIcon = incident.status === 'resolved' ? '✓' : '⚠';
+
+            const safeTitle = this.escapeHtml(incident.title);
+
+            return `
+                <div class="incident-item ${statusClass}">
+                    <div class="incident-header">
+                        <div class="incident-status-indicator ${statusClass}">
+                            <span class="incident-icon">${statusIcon}</span>
+                        </div>
+                        <div class="incident-details">
+                            <h3 class="incident-title">${safeTitle}</h3>
+                            <div class="incident-meta">
+                                <span class="incident-time">${this.formatDateTime(incident.started_at)}</span>
+                                <span class="incident-separator">•</span>
+                                <span class="incident-duration">${this.escapeHtml(incident.duration)}</span>
+                                <span class="incident-separator">•</span>
+                                <span class="incident-status ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = html;
+
+        // Show/hide "Show More" button
+        if (incidents.length > INITIAL_COUNT && !showAll) {
+            showMoreBtn.style.display = 'block';
+            showMoreBtn.textContent = `Show More (${incidents.length - INITIAL_COUNT} more)`;
+        } else if (incidents.length > INITIAL_COUNT && showAll) {
+            showMoreBtn.style.display = 'block';
+            showMoreBtn.textContent = 'Show Less';
+        } else {
+            showMoreBtn.style.display = 'none';
+        }
+    }
+
+    toggleShowMoreIncidents() {
+        this.showingAllIncidents = !this.showingAllIncidents;
+        this.renderIncidents(this.allIncidents, this.showingAllIncidents);
+    }
+
+    formatDateTime(isoString) {
+        if (!isoString) return '--';
+        try {
+            const date = new Date(isoString);
+            return date.toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return '--';
+        }
     }
 
     exportEventsCsv() {

@@ -6474,3 +6474,223 @@ input[type="checkbox"]:checked {
 .visibility-public-name .form-text {
     color: var(--text-secondary);
 }
+
+/* ========================================
+   INCIDENTS TAB
+   ======================================== */
+
+.incidents-dashboard {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.incidents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.incidents-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.incidents-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.incidents-filter-btn {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.incidents-filter-btn:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.incidents-filter-btn.active {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Incidents Container */
+.incidents-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.no-incidents {
+    padding: 64px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Incident Item */
+.incident-item {
+    background: rgba(15, 20, 31, 0.4);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.incident-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.incident-item:last-child {
+    border-bottom: 1px solid var(--border);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.incident-item:hover {
+    background: rgba(0, 240, 255, 0.05);
+    border-color: var(--primary);
+}
+
+.incident-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.incident-status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.incident-status-indicator.resolved {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.incident-status-indicator.ongoing {
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--warning);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    animation: pulse-warning 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.incident-details {
+    flex: 1;
+}
+
+.incident-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+}
+
+.incident-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.incident-time,
+.incident-duration {
+    color: var(--text-secondary);
+}
+
+.incident-separator {
+    color: var(--border);
+}
+
+.incident-status.resolved {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.incident-status.ongoing {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.show-more-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 24px;
+    margin-top: 16px;
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.show-more-btn:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Settings description helper text */
+.settings-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .incidents-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .incidents-filters {
+        width: 100%;
+    }
+
+    .incidents-filter-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .incident-meta {
+        font-size: 0.8rem;
+    }
+}

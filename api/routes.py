@@ -12,7 +12,7 @@ import logging
 import re
 import aiofiles
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from monitor.models import TargetCreate, TargetUpdate, Target, SystemStatus
@@ -526,6 +526,133 @@ async def get_alert_log(target_id: str = None, limit: int = 100):
         alert['target_name'] = target_map.get(alert['target_id'], 'Unknown Target')
 
     return alerts
+
+
+@router.get("/incidents")
+async def get_incidents(days: int = 14) -> Dict[str, Any]:
+    """
+    Internal API endpoint - Returns recent incidents from the alert log.
+    Shows ALL targets (not filtered by public_visible).
+
+    Query parameters:
+    - days: Number of days to look back (default: 14, max: 90)
+
+    Returns list of incidents with start time, duration, and status.
+    """
+    try:
+        # Limit days parameter
+        days = max(1, min(days, 90))
+
+        # Calculate time range
+        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days)
+
+        # Get all targets
+        all_targets = await db.get_all_targets()
+        target_map = {t['id']: t['name'] for t in all_targets}
+
+        # Get all recent alerts
+        all_alerts = await db.get_alert_log(limit=1000)
+
+        # Build incident list - process in chronological order (oldest first)
+        incidents_list = []
+        current_incidents = {}  # Track ongoing incidents per target
+
+        # Reverse the list to process oldest first
+        for alert in reversed(all_alerts):
+            # Parse timestamp
+            try:
+                alert_time = datetime.fromisoformat(alert['timestamp'].replace('Z', '+00:00'))
+                if alert_time.tzinfo is None:
+                    # If no timezone info, assume UTC
+                    alert_time = alert_time.replace(tzinfo=timezone.utc)
+
+                # Skip if outside time range
+                if alert_time < cutoff_time:
+                    continue
+            except (ValueError, KeyError):
+                continue
+
+            target_id = alert['target_id']
+            target_name = target_map.get(target_id, 'Unknown Target')
+            event_type = alert.get('event_type', '')
+
+            if event_type == 'threshold_reached':
+                # Check if target already has an ongoing incident
+                if target_id not in current_incidents or current_incidents[target_id].get('resolved_at'):
+                    # Start a new incident for this target
+                    incident = {
+                        'id': alert.get('id'),
+                        'target_id': target_id,
+                        'target_name': target_name,
+                        'title': f"Outage: {target_name}",
+                        'started_at': alert['timestamp'],
+                        'resolved_at': None,
+                        'status': 'investigating',
+                        'message': alert.get('message', '')
+                    }
+                    current_incidents[target_id] = incident
+                    incidents_list.append(incident)
+
+            elif event_type == 'recovered':
+                # Resolve the current incident for this target if it exists
+                if target_id in current_incidents and not current_incidents[target_id].get('resolved_at'):
+                    current_incidents[target_id]['resolved_at'] = alert['timestamp']
+                    current_incidents[target_id]['status'] = 'resolved'
+
+        # Sort by start time (newest first)
+        incidents_list.sort(key=lambda x: x['started_at'], reverse=True)
+
+        # Calculate durations and format incidents
+        formatted_incidents = []
+        for incident in incidents_list:
+            started_at = datetime.fromisoformat(incident['started_at'].replace('Z', '+00:00'))
+
+            if incident['resolved_at']:
+                resolved_at = datetime.fromisoformat(incident['resolved_at'].replace('Z', '+00:00'))
+                duration_seconds = (resolved_at - started_at).total_seconds()
+            else:
+                # Still ongoing
+                duration_seconds = (datetime.now(timezone.utc).replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
+                incident['status'] = 'ongoing'
+
+            # Format duration
+            if duration_seconds < 60:
+                duration_str = f"{int(duration_seconds)}s"
+            elif duration_seconds < 3600:
+                minutes = int(duration_seconds / 60)
+                duration_str = f"{minutes}m"
+            elif duration_seconds < 86400:
+                hours = int(duration_seconds / 3600)
+                minutes = int((duration_seconds % 3600) / 60)
+                duration_str = f"{hours}h {minutes}m" if minutes > 0 else f"{hours}h"
+            else:
+                days_count = int(duration_seconds / 86400)
+                hours = int((duration_seconds % 86400) / 3600)
+                duration_str = f"{days_count}d {hours}h" if hours > 0 else f"{days_count}d"
+
+            formatted_incidents.append({
+                'id': incident['id'],
+                'title': incident['title'],
+                'target_name': incident['target_name'],
+                'started_at': incident['started_at'],
+                'resolved_at': incident['resolved_at'],
+                'duration': duration_str,
+                'status': incident['status']
+            })
+
+        return {
+            'success': True,
+            'incidents': formatted_incidents,
+            'count': len(formatted_incidents),
+            'days': days
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching incidents: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to fetch incidents"
+        )
 
 
 @router.get("/alerts/state")
