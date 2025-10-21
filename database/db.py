@@ -171,6 +171,19 @@ class Database:
             )
         """)
 
+        # API keys table (for relay controller polling)
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS api_keys (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                key TEXT UNIQUE NOT NULL,
+                name TEXT,
+                enabled INTEGER DEFAULT 1,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                last_used TEXT,
+                access_count INTEGER DEFAULT 0
+            )
+        """)
+
         # ===== AUTHENTICATION TABLES =====
 
         # Users table - Single user per instance
@@ -241,6 +254,10 @@ class Database:
         await db.execute("""
             CREATE INDEX IF NOT EXISTS idx_public_tokens_enabled
             ON public_tokens(enabled)
+        """)
+        await db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_api_keys_key
+            ON api_keys(key, enabled)
         """)
         await db.execute("""
             CREATE INDEX IF NOT EXISTS idx_sessions_token
@@ -1164,6 +1181,228 @@ class Database:
         except Exception as e:
             logger.error(f"Failed to update target visibility: {e}")
             return False
+
+    # ===== API KEY MANAGEMENT (for external integrations) =====
+
+    async def create_api_key(self, name: Optional[str] = None) -> Dict:
+        """
+        Generate a new API key for external integrations.
+
+        Args:
+            name: Optional friendly name for the API key (e.g., "Home Assistant", "Node-RED")
+
+        Returns:
+            Dictionary with key details: {key, name, created_at, enabled}
+        """
+        import secrets
+
+        db = await self._get_connection()
+
+        # Generate cryptographically secure random key (32 bytes = 43 chars base64)
+        api_key = secrets.token_urlsafe(32)
+        created_at = utc_now()
+
+        try:
+            await db.execute("""
+                INSERT INTO api_keys (key, name, enabled, created_at, access_count)
+                VALUES (?, ?, 1, ?, 0)
+            """, (api_key, name, created_at))
+            await db.commit()
+
+            logger.info(f"Created new API key: {name or 'Unnamed'} ({api_key[:8]}...)")
+
+            return {
+                'key': api_key,
+                'name': name,
+                'enabled': True,
+                'created_at': created_at,
+                'last_used': None,
+                'access_count': 0
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to create API key: {e}")
+            raise
+
+    async def validate_api_key(self, key: str) -> Optional[Dict]:
+        """
+        Validate API key and update last_used timestamp.
+
+        Args:
+            key: API key to validate
+
+        Returns:
+            Dictionary with key details if valid and enabled, None otherwise
+        """
+        if not key:
+            return None
+
+        db = await self._get_connection()
+        db.row_factory = aiosqlite.Row
+
+        try:
+            # Check if key exists and is enabled
+            async with db.execute("""
+                SELECT id, key, name, enabled, created_at, last_used, access_count
+                FROM api_keys
+                WHERE key = ? AND enabled = 1
+            """, (key,)) as cursor:
+                row = await cursor.fetchone()
+
+                if not row:
+                    logger.warning(f"Invalid or disabled API key attempted: {key[:8]}...")
+                    return None
+
+                key_data = dict(row)
+
+                # Update last_used timestamp and increment access count
+                await db.execute("""
+                    UPDATE api_keys
+                    SET last_used = ?,
+                        access_count = access_count + 1
+                    WHERE key = ?
+                """, (utc_now(), key))
+                await db.commit()
+
+                return key_data
+
+        except Exception as e:
+            logger.error(f"Failed to validate API key: {e}")
+            return None
+
+    async def list_api_keys(self) -> List[Dict]:
+        """
+        List all API keys with their metadata.
+
+        Returns:
+            List of API key dictionaries (excluding the actual key value for security)
+        """
+        db = await self._get_connection()
+        db.row_factory = aiosqlite.Row
+
+        try:
+            async with db.execute("""
+                SELECT id, name, enabled, created_at, last_used, access_count
+                FROM api_keys
+                ORDER BY created_at DESC
+            """) as cursor:
+                rows = await cursor.fetchall()
+                return [dict(row) for row in rows]
+
+        except Exception as e:
+            logger.error(f"Failed to list API keys: {e}")
+            return []
+
+    async def get_api_key_by_id(self, key_id: int) -> Optional[Dict]:
+        """
+        Get API key details by ID (includes the actual key).
+
+        Args:
+            key_id: API key ID
+
+        Returns:
+            Dictionary with key details including actual key, or None if not found
+        """
+        db = await self._get_connection()
+        db.row_factory = aiosqlite.Row
+
+        try:
+            async with db.execute("""
+                SELECT id, key, name, enabled, created_at, last_used, access_count
+                FROM api_keys
+                WHERE id = ?
+            """, (key_id,)) as cursor:
+                row = await cursor.fetchone()
+                return dict(row) if row else None
+
+        except Exception as e:
+            logger.error(f"Failed to get API key: {e}")
+            return None
+
+    async def toggle_api_key(self, key_id: int, enabled: bool) -> bool:
+        """
+        Enable or disable an API key.
+
+        Args:
+            key_id: API key ID
+            enabled: True to enable, False to disable
+
+        Returns:
+            True if successful
+        """
+        db = await self._get_connection()
+
+        try:
+            await db.execute("""
+                UPDATE api_keys
+                SET enabled = ?
+                WHERE id = ?
+            """, (1 if enabled else 0, key_id))
+            await db.commit()
+
+            action = "enabled" if enabled else "disabled"
+            logger.info(f"API key {key_id} {action}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to toggle API key: {e}")
+            return False
+
+    async def delete_api_key(self, key_id: int) -> bool:
+        """
+        Permanently delete an API key.
+
+        Args:
+            key_id: API key ID
+
+        Returns:
+            True if successful
+        """
+        db = await self._get_connection()
+
+        try:
+            await db.execute("DELETE FROM api_keys WHERE id = ?", (key_id,))
+            await db.commit()
+            logger.info(f"API key {key_id} deleted")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to delete API key: {e}")
+            return False
+
+    async def get_failing_targets(self) -> List[Dict]:
+        """
+        Get all targets currently exceeding their failure threshold.
+        Used by external integrations for fast polling.
+
+        Returns:
+            List of failing target dictionaries with minimal fields
+        """
+        db = await self._get_connection()
+        db.row_factory = aiosqlite.Row
+
+        try:
+            async with db.execute("""
+                SELECT
+                    id,
+                    name,
+                    status,
+                    current_failures,
+                    failure_threshold
+                FROM targets
+                WHERE
+                    enabled = 1
+                    AND current_failures >= failure_threshold
+                    AND status = 'down'
+                    AND acknowledged = 0
+                ORDER BY name ASC
+            """) as cursor:
+                rows = await cursor.fetchall()
+                return [dict(row) for row in rows]
+
+        except Exception as e:
+            logger.error(f"Failed to get failing targets: {e}")
+            return []
 
 
 # Global database instance

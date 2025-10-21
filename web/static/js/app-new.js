@@ -721,6 +721,10 @@ class WebStatusApp {
         // Sharing tab buttons
         document.getElementById('generateTokenBtn')?.addEventListener('click', () => this.generatePublicToken());
         document.getElementById('previewPublicPageBtn')?.addEventListener('click', () => this.previewPublicPage());
+
+        // API key management buttons
+        document.getElementById('generateApiKeyBtn')?.addEventListener('click', () => this.openGenerateApiKeyModal());
+        document.getElementById('confirmGenerateApiKeyBtn')?.addEventListener('click', () => this.createApiKey());
     }
 
     openSidebar() {
@@ -1344,6 +1348,7 @@ class WebStatusApp {
             this.loadSettings();
             this.loadHealthDashboard(); // Load health dashboard as it's now part of settings
             this.initSharingTab(); // Sharing is now part of settings
+            this.loadApiKeys(); // Load API keys for relay controllers
         } else if (tab === 'uptime') {
 
             this.loadUptimeDashboard();
@@ -3695,6 +3700,193 @@ class WebStatusApp {
         } catch (error) {
             console.error('Failed to preview:', error);
             this.showToast('Failed to preview public page', 'error');
+        }
+    }
+
+    // ========================================================================
+    // API KEY MANAGEMENT (External Integrations)
+    // ========================================================================
+
+    async loadApiKeys() {
+        try {
+            const response = await this.apiGet('/api-keys');
+            const container = document.getElementById('apiKeysContainer');
+            const countBadge = document.getElementById('apiKeysCount');
+
+            if (!container || !countBadge) return;
+
+            // Update count badge
+            const count = response.keys?.length || 0;
+            countBadge.textContent = `${count} ${count === 1 ? 'key' : 'keys'}`;
+
+            // Render API keys
+            if (!response.keys || response.keys.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔑</div>
+                        <h3>No API Keys Yet</h3>
+                        <p>Generate an API key to allow external integrations to access your monitoring data.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = response.keys.map(key => `
+                <div class="api-key-item" data-key-id="${key.id}">
+                    <div class="api-key-info">
+                        <div class="api-key-name">
+                            <strong>${this.escapeHtml(key.name || 'Unnamed Key')}</strong>
+                            ${key.enabled ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-secondary">Disabled</span>'}
+                        </div>
+                        <div class="api-key-meta">
+                            <span>Created: ${this.formatDate(key.created_at)}</span>
+                            ${key.last_used ? `<span>Last used: ${this.formatDate(key.last_used)}</span>` : '<span>Never used</span>'}
+                            <span>Usage: ${key.access_count || 0} requests</span>
+                        </div>
+                    </div>
+                    <div class="api-key-actions">
+                        <button class="btn btn-icon" onclick="app.toggleApiKey(${key.id}, ${!key.enabled})" title="${key.enabled ? 'Disable' : 'Enable'} key">
+                            <span class="icon-${key.enabled ? 'pause' : 'play'}"></span>
+                        </button>
+                        <button class="btn btn-icon btn-danger" onclick="app.deleteApiKey(${key.id}, '${this.escapeHtml(key.name || 'this key')}')" title="Delete key">
+                            <span class="icon-trash"></span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Failed to load API keys:', error);
+            this.showToast('Failed to load API keys', 'error');
+        }
+    }
+
+    openGenerateApiKeyModal() {
+        const modal = document.getElementById('generateApiKeyModal');
+        if (!modal) return;
+
+        // Clear input
+        const nameInput = document.getElementById('apiKeyName');
+        if (nameInput) nameInput.value = '';
+
+        // Show modal
+        modal.style.display = 'flex';
+    }
+
+    closeGenerateApiKeyModal() {
+        const modal = document.getElementById('generateApiKeyModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async createApiKey() {
+        try {
+            const name = document.getElementById('apiKeyName').value.trim();
+
+            const response = await this.apiPost('/api-keys', {
+                name: name || null
+            });
+
+            if (response.success) {
+                // Close generate modal
+                this.closeGenerateApiKeyModal();
+
+                // Show the API key modal with the newly created key
+                this.showApiKeyModal(response.key, response.name);
+
+                // Reload API keys list
+                await this.loadApiKeys();
+
+                this.showToast('API key created successfully', 'success');
+            } else {
+                throw new Error(response.message || 'Failed to create API key');
+            }
+        } catch (error) {
+            console.error('Failed to create API key:', error);
+            this.showToast('Failed to create API key', 'error');
+        }
+    }
+
+    showApiKeyModal(apiKey, keyName) {
+        const modal = document.getElementById('apiKeyModal');
+        const keyInput = document.getElementById('newApiKeyValue');
+        const exampleCode = document.getElementById('apiKeyExample');
+
+        if (!modal || !keyInput || !exampleCode) return;
+
+        // Set the API key value
+        keyInput.value = apiKey;
+
+        // Generate example curl command
+        const hostname = window.location.hostname;
+        const port = window.location.port ? `:${window.location.port}` : '';
+        const protocol = window.location.protocol;
+        exampleCode.textContent = `curl -H "x-api-key: ${apiKey}" \\
+  ${protocol}//${hostname}${port}/api/v1/alert-status`;
+
+        // Show modal
+        modal.style.display = 'flex';
+
+        // Auto-select the API key for easy copying
+        setTimeout(() => keyInput.select(), 100);
+    }
+
+    closeApiKeyModal() {
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    copyApiKey() {
+        const keyInput = document.getElementById('newApiKeyValue');
+        if (!keyInput) return;
+
+        keyInput.select();
+        document.execCommand('copy');
+
+        this.showToast('API key copied to clipboard', 'success');
+    }
+
+    async toggleApiKey(keyId, enabled) {
+        try {
+            const response = await fetch(`${this.apiBase}/api-keys/${keyId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                await this.loadApiKeys();
+                this.showToast(`API key ${enabled ? 'enabled' : 'disabled'}`, 'success');
+            } else {
+                throw new Error(data.message || 'Failed to toggle API key');
+            }
+        } catch (error) {
+            console.error('Failed to toggle API key:', error);
+            this.showToast('Failed to update API key', 'error');
+        }
+    }
+
+    async deleteApiKey(keyId, keyName) {
+        if (!confirm(`Are you sure you want to delete "${keyName}"?\n\nThis action cannot be undone. Any integration using this key will stop working.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiBase}/api-keys/${keyId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                await this.loadApiKeys();
+                this.showToast('API key deleted successfully', 'success');
+            } else {
+                throw new Error(data.message || 'Failed to delete API key');
+            }
+        } catch (error) {
+            console.error('Failed to delete API key:', error);
+            this.showToast('Failed to delete API key', 'error');
         }
     }
 }

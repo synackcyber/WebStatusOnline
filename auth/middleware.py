@@ -29,6 +29,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/auth/",
         "/public/",
         "/api/v1/public/",
+        "/api/v1/alert-status",  # Alert status endpoint has its own API key auth
         "/static/",
         "/sounds/",
         "/docs",

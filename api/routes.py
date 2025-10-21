@@ -2,7 +2,7 @@
 API routes for WebStatus.
 Optimized with security enhancements and performance improvements.
 """
-from fastapi import APIRouter, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, HTTPException, status, UploadFile, File, Request
 from typing import List, Dict, Any, Optional
 import json
 import uuid
@@ -19,6 +19,7 @@ from monitor.models import TargetCreate, TargetUpdate, Target, SystemStatus
 from database.db import db
 from utils.time_utils import calculate_current_duration, calculate_uptime_percentage, format_duration
 from config.features import FeatureFlags
+from utils.rate_limiter import rate_limiter
 
 logger = logging.getLogger(__name__)
 
@@ -510,6 +511,111 @@ async def get_system_status():
         targets_unknown=targets_unknown,
         alerts_active=alerts_active
     )
+
+
+# Alert status endpoint (for external integrations)
+@router.get("/alert-status")
+async def get_alert_status(request: Request) -> Dict[str, Any]:
+    """
+    Lightweight polling endpoint for external integrations (Pi relays, webhooks, automations, etc).
+
+    Returns alert state and failing targets for external systems.
+    Optimized for 10-30 second polling intervals.
+
+    Authentication: Requires valid API key in x-api-key header
+
+    Response:
+        {
+            "alert": bool,              # True if ANY target is failing
+            "failing_targets": [...],   # List of targets exceeding threshold
+            "failing_count": int,       # Quick count for logging
+            "timestamp": str            # ISO 8601 UTC timestamp
+        }
+    """
+    try:
+        # Validate API key from header
+        api_key = request.headers.get("x-api-key")
+
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing API key in x-api-key header"
+            )
+
+        # Rate limit: 120 requests per minute per API key (allows 30s polling with headroom)
+        allowed, rate_info = rate_limiter.is_allowed(
+            identifier=f"api_key:{api_key[:16]}",  # Use partial key as identifier
+            max_requests=120,
+            window_seconds=60
+        )
+
+        if not allowed:
+            logger.warning(f"Rate limit exceeded for API key {api_key[:8]}... ({rate_info['current_count']}/{rate_info['limit']} requests)")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Rate limit exceeded. Try again in {rate_info['retry_after']} seconds.",
+                headers={"Retry-After": str(rate_info['retry_after'])}
+            )
+
+        # Validate API key and update usage stats
+        key_data = await db.validate_api_key(api_key)
+
+        if not key_data:
+            # Rate limit failed authentication attempts by IP to prevent brute force
+            client_ip = request.client.host if request.client else "unknown"
+            allowed_auth, auth_rate_info = rate_limiter.is_allowed(
+                identifier=f"failed_auth:{client_ip}",
+                max_requests=10,  # Only 10 failed attempts per minute per IP
+                window_seconds=60
+            )
+
+            if not allowed_auth:
+                logger.warning(f"Too many failed auth attempts from {client_ip}")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"Too many failed authentication attempts. Try again in {auth_rate_info['retry_after']} seconds.",
+                    headers={"Retry-After": str(auth_rate_info['retry_after'])}
+                )
+
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or disabled API key"
+            )
+
+        # Get failing targets (fast single query)
+        failing_targets = await db.get_failing_targets()
+
+        # Build response
+        response = {
+            "alert": len(failing_targets) > 0,
+            "failing_targets": [
+                {
+                    "name": target["name"],
+                    "status": target["status"],
+                    "failures": target["current_failures"],
+                    "threshold": target["failure_threshold"]
+                }
+                for target in failing_targets
+            ],
+            "failing_count": len(failing_targets),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+        # Log for monitoring (minimal verbosity)
+        key_name = key_data.get('name', 'Unnamed')
+        if failing_targets:
+            logger.info(f"API status check: {len(failing_targets)} failing (API key: {key_name})")
+
+        return response
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Relay status error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to fetch alert status"
+        )
 
 
 # Alert log endpoint
@@ -1559,6 +1665,199 @@ async def update_backup_settings(settings: dict):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to update backup settings: {str(e)}"
+        )
+
+
+# ==================== API KEY MANAGEMENT (External Integrations) ====================
+
+@router.post("/api-keys")
+async def create_api_key(request: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Generate a new API key for external integrations (relays, automations, webhooks, etc).
+
+    Request body: { "name": "Optional key name" }
+
+    Returns:
+        {
+            "success": True,
+            "key": "the-generated-api-key",
+            "name": "Key name",
+            "created_at": "timestamp",
+            "message": "success message"
+        }
+    """
+    try:
+        key_name = request.get('name', '').strip() or None
+
+        # Create API key
+        key_data = await db.create_api_key(key_name)
+
+        logger.info(f"Created API key: {key_name or 'Unnamed'}")
+
+        return {
+            'success': True,
+            'key': key_data['key'],
+            'name': key_data['name'],
+            'created_at': key_data['created_at'],
+            'enabled': key_data['enabled'],
+            'message': 'API key created successfully'
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to create API key: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create API key"
+        )
+
+
+@router.get("/api-keys")
+async def list_api_keys() -> Dict[str, Any]:
+    """
+    List all API keys with their metadata (excludes actual key values).
+
+    Returns:
+        {
+            "success": True,
+            "keys": [...],
+            "count": int
+        }
+    """
+    try:
+        keys = await db.list_api_keys()
+
+        return {
+            'success': True,
+            'keys': keys,
+            'count': len(keys)
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to list API keys: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve API keys"
+        )
+
+
+@router.get("/api-keys/{key_id}")
+async def get_api_key(key_id: int) -> Dict[str, Any]:
+    """
+    Get specific API key details by ID (includes actual key value).
+
+    Returns:
+        {
+            "success": True,
+            "key_data": {...}
+        }
+    """
+    try:
+        key_data = await db.get_api_key_by_id(key_id)
+
+        if not key_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found"
+            )
+
+        return {
+            'success': True,
+            'key_data': key_data
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get API key: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve API key"
+        )
+
+
+@router.patch("/api-keys/{key_id}")
+async def update_api_key(key_id: int, request: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Enable or disable an API key.
+
+    Request body: { "enabled": true/false }
+
+    Returns:
+        {
+            "success": True,
+            "message": "API key enabled/disabled successfully"
+        }
+    """
+    try:
+        if 'enabled' not in request:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="'enabled' field is required"
+            )
+
+        enabled = request.get('enabled')
+        success = await db.toggle_api_key(key_id, enabled)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found"
+            )
+
+        action = "enabled" if enabled else "disabled"
+        logger.info(f"API key {key_id} {action}")
+
+        return {
+            'success': True,
+            'enabled': enabled,
+            'message': f"API key {action} successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update API key: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update API key"
+        )
+
+
+@router.delete("/api-keys/{key_id}")
+async def delete_api_key(key_id: int) -> Dict[str, Any]:
+    """
+    Permanently delete an API key.
+    This action cannot be undone.
+
+    Returns:
+        {
+            "success": True,
+            "message": "API key deleted successfully"
+        }
+    """
+    try:
+        success = await db.delete_api_key(key_id)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="API key not found"
+            )
+
+        logger.info(f"API key {key_id} deleted")
+
+        return {
+            'success': True,
+            'message': 'API key deleted successfully'
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete API key: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete API key"
         )
 
 

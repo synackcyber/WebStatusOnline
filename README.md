@@ -10,7 +10,7 @@ A comprehensive network monitoring system that monitors multiple targets (ping, 
 - **Webhook Notifications**: Universal webhook support for integration with any service
 - **SMTP Email Alerts**: Send email notifications when targets go down or recover
 - **Web Dashboard**: Clean, responsive web interface with real-time updates
-- **REST API**: Full-featured API for automation and integration
+- **REST API**: Full-featured API for automation and external integrations (Home Assistant, Node-RED, IoT devices, etc.)
 - **Authentication**: Secure login system with session management
 - **Alert Acknowledgment**: Silence alerts for known issues while continuing monitoring
 - **Uptime Tracking**: Track uptime/downtime percentages and durations
@@ -55,6 +55,41 @@ docker-compose logs -f
 ```
 
 **Note**: Your data, configuration, and custom sounds are preserved in mounted volumes and will not be affected by updates.
+
+## API Access for External Integrations
+
+PiAlert provides a REST API for external integrations. Perfect for:
+
+- **Home Automation**: Home Assistant, Node-RED
+- **IoT Devices**: Raspberry Pi relays, ESP32, Arduino
+- **Notifications**: Discord bots, Slack webhooks, Telegram
+- **Custom Scripts**: Python, bash, JavaScript
+- **Dashboards**: Grafana, custom web apps
+
+### Quick API Example
+
+```bash
+# 1. Generate an API key in Settings → API Keys
+# 2. Poll the alert status endpoint
+
+curl -H "x-api-key: YOUR_API_KEY" \
+  http://localhost:8000/api/v1/alert-status
+```
+
+**Response:**
+
+```json
+{
+  "alert": true,
+  "failing_targets": [
+    {"name": "Server", "status": "down", "failures": 5, "threshold": 3}
+  ],
+  "failing_count": 1,
+  "timestamp": "2025-10-21T21:14:18.317325+00:00"
+}
+```
+
+📖 **Full API documentation:** [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ## Docker Deployment
 
@@ -380,6 +415,7 @@ Contributions are welcome! Feel free to submit issues or pull requests.
 
 - [QUICKSTART.md](QUICKSTART.md) - Quick start guide
 - [DOCKER.md](DOCKER.md) - Docker deployment details
+- [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - **API Reference for External Integrations**
 - [CUSTOM_AUDIO_GUIDE.md](CUSTOM_AUDIO_GUIDE.md) - Audio customization
 - [docs/DATABASE_MAINTENANCE.md](docs/DATABASE_MAINTENANCE.md) - Database maintenance
 

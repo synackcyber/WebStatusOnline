@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebStatus - System Monitor</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=1760817551">
+    <link rel="stylesheet" href="/static/css/style.css?v=1760817800">
 </head>
 <body>
     <!-- Hamburger Menu Sidebar -->
@@ -488,6 +488,86 @@
                 </div>
             </div>
 
+            <!-- API Keys Management Section -->
+            <div class="settings-section">
+                <h2>API Keys</h2>
+                <p class="settings-description">Manage API keys for external integrations. Use these keys to access monitoring data from scripts, automations, webhooks, IoT devices, and custom applications.</p>
+
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h3>API Keys</h3>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span class="card-badge" id="apiKeysCount">0 keys</span>
+                            <button class="btn btn-primary btn-small" id="generateApiKeyBtn">
+                                <span class="icon-plus"></span> Generate New API Key
+                            </button>
+                        </div>
+                    </div>
+                    <p class="card-description">
+                        API keys allow external systems to poll <code>/api/v1/alert-status</code> and access alert state data. Perfect for Home Assistant, Node-RED, Pi relays, Discord bots, and more.
+                    </p>
+                    <div class="api-keys-container" id="apiKeysContainer">
+                        <!-- API keys will be rendered here by JavaScript -->
+                        <div class="loading-placeholder">
+                            <div class="spinner-small"></div>
+                            <p>Loading API keys...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for New API Key Display -->
+                <div class="api-key-modal" id="apiKeyModal" style="display: none;">
+                    <div class="modal-dialog" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h2>API Key Created</h2>
+                            <button class="modal-close" onclick="app.closeApiKeyModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <strong>⚠️ Important:</strong> Copy this API key now. For security reasons, it cannot be viewed again after closing this dialog.
+                            </div>
+                            <div class="form-group">
+                                <label>API Key</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="newApiKeyValue" class="form-control" readonly style="font-family: monospace; font-size: 13px;">
+                                    <button class="btn btn-secondary" onclick="app.copyApiKey()">
+                                        <span class="icon-copy"></span> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Example Usage (curl)</label>
+                                <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto;"><code id="apiKeyExample"></code></pre>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary btn-large" onclick="app.closeApiKeyModal()">Done</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for Generating New API Key -->
+                <div class="api-key-modal" id="generateApiKeyModal" style="display: none;">
+                    <div class="modal-dialog" style="max-width: 500px;">
+                        <div class="modal-header">
+                            <h2>Generate New API Key</h2>
+                            <button class="modal-close" onclick="app.closeGenerateApiKeyModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="apiKeyName">Key Name (optional)</label>
+                                <input type="text" id="apiKeyName" class="form-control" placeholder="e.g., Home Assistant, Node-RED, Discord Bot">
+                                <small class="form-text">Give this key a friendly name to identify which integration uses it</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary btn-large" onclick="app.closeGenerateApiKeyModal()">Cancel</button>
+                            <button class="btn btn-primary btn-large" id="confirmGenerateApiKeyBtn">Generate Key</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="settings-section">
                 <h2>General Settings</h2>
                 <form id="settingsForm">
@@ -851,6 +931,6 @@
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
 
-    <script src="/static/js/app-new.js?v=1760817534"></script>
+    <script src="/static/js/app-new.js?v=1760817800"></script>
 </body>
 </html>
