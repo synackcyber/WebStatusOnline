@@ -20,9 +20,7 @@ A comprehensive network monitoring system that monitors multiple targets (ping, 
 - **Database Archival**: Automated cleanup of old monitoring data
 - **SQLite Database**: Lightweight, persistent storage for history and statistics
 
-## Quick Start with Docker (Recommended)
-
-The easiest way to get started:
+## Quick Start with Docker
 
 ```bash
 # Clone the repository
@@ -37,21 +35,26 @@ Access the web interface at [http://localhost:8000](http://localhost:8000)
 
 On first visit, you'll be prompted to create an admin account.
 
-## Alternative: Native Python Installation
+## Updating to Latest Version
 
-For development or systems without Docker:
+To update your existing installation with the latest changes:
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Navigate to your installation directory
+cd /path/to/WebStatusOnline
 
-# Install dependencies
-pip install -r requirements.txt
+# Pull the latest changes from GitHub
+git pull origin main
 
-# Run the application
-python main.py
+# Restart the Docker containers to apply updates
+docker-compose down
+docker-compose up -d
+
+# Verify the update
+docker-compose logs -f
 ```
+
+**Note**: Your data, configuration, and custom sounds are preserved in mounted volumes and will not be affected by updates.
 
 ## Docker Deployment
 
@@ -269,23 +272,24 @@ For detailed maintenance guide, see [docs/DATABASE_MAINTENANCE.md](docs/DATABASE
 
 ## Service Management
 
-Using the included service manager:
+Using Docker Compose:
 
 ```bash
-# Start the service (native Python)
-./run.sh start
+# Start the service
+docker-compose up -d
 
 # Stop the service
-./run.sh stop
+docker-compose down
 
-# Restart
-./run.sh restart
+# Restart the service
+docker-compose restart
+
+# View logs
+docker-compose logs -f
 
 # Check status
-./run.sh status
+docker-compose ps
 ```
-
-For systemd service setup (auto-start on boot), see [QUICKSTART.md](QUICKSTART.md).
 
 ## Project Structure
 
@@ -328,10 +332,9 @@ webstatus/
 
 ## Requirements
 
-- **Docker**: Recommended for deployment (any OS)
-- **Python 3.9+**: For native installation
-- **SQLite**: Included with Python
+- **Docker & Docker Compose**: Required for deployment (any OS)
 - **Network access**: For monitoring remote targets
+- **Git**: For cloning and updating the repository
 
 ## Security
 
