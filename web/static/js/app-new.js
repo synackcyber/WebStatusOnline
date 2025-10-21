@@ -22,6 +22,8 @@ class WebStatusApp {
         this.incidentsDays = 14; // Default: 14 days for incidents
         this.allIncidents = []; // Store all incidents for show more
         this.showingAllIncidents = false; // Track show more state
+        this.incidentsStatusFilter = 'all'; // Filter: all, ongoing, resolved
+        this.incidentsSummary = null; // Store summary stats
 
         // Audio management for autoplay compatibility
         this.audioElements = {}; // Pre-loaded audio elements
@@ -631,6 +633,12 @@ class WebStatusApp {
                 this.incidentsDays = parseInt(e.target.dataset.days);
                 this.loadIncidents();
             });
+        });
+
+        // Incidents status filter dropdown
+        document.getElementById('incidentsStatusFilter')?.addEventListener('change', (e) => {
+            this.incidentsStatusFilter = e.target.value;
+            this.renderIncidents(this.allIncidents, this.showingAllIncidents);
         });
 
         // Incidents show more button
@@ -2308,10 +2316,16 @@ class WebStatusApp {
 
             const data = await response.json();
             this.allIncidents = data.incidents || [];
+            this.incidentsSummary = data.summary || null;
+
+            this.renderSummary(this.incidentsSummary);
             this.renderIncidents(this.allIncidents, this.showingAllIncidents);
 
         } catch (error) {
             console.error('Failed to load incidents:', error);
+            const summaryCard = document.getElementById('incidentsSummary');
+            if (summaryCard) summaryCard.style.display = 'none';
+
             container.innerHTML = this.createEmptyState({
                 icon: '⚠️',
                 title: 'Failed to Load Incidents',
@@ -2326,11 +2340,23 @@ class WebStatusApp {
         const showMoreBtn = document.getElementById('incidentsShowMoreBtn');
         const INITIAL_COUNT = 10;
 
-        if (!incidents || incidents.length === 0) {
+        // Apply status filter
+        let filteredIncidents = incidents;
+        if (this.incidentsStatusFilter === 'ongoing') {
+            filteredIncidents = incidents.filter(inc => inc.status !== 'resolved');
+        } else if (this.incidentsStatusFilter === 'resolved') {
+            filteredIncidents = incidents.filter(inc => inc.status === 'resolved');
+        }
+
+        if (!filteredIncidents || filteredIncidents.length === 0) {
+            const filterMsg = this.incidentsStatusFilter === 'ongoing' ? 'No ongoing incidents.' :
+                            this.incidentsStatusFilter === 'resolved' ? 'No resolved incidents.' :
+                            `No incidents found in the past ${this.incidentsDays} days.`;
+
             container.innerHTML = this.createEmptyState({
                 icon: '✅',
                 title: 'No Incidents',
-                description: `No incidents found in the past ${this.incidentsDays} days. All systems running smoothly!`,
+                description: filterMsg + ' All systems running smoothly!',
                 compact: true
             });
             showMoreBtn.style.display = 'none';
@@ -2338,7 +2364,7 @@ class WebStatusApp {
         }
 
         // Show first 10, expand on "Show More"
-        const incidentsToShow = showAll ? incidents : incidents.slice(0, INITIAL_COUNT);
+        const incidentsToShow = showAll ? filteredIncidents : filteredIncidents.slice(0, INITIAL_COUNT);
 
         const html = incidentsToShow.map(incident => {
             const statusClass = incident.status === 'resolved' ? 'resolved' : 'ongoing';
@@ -2371,14 +2397,37 @@ class WebStatusApp {
         container.innerHTML = html;
 
         // Show/hide "Show More" button
-        if (incidents.length > INITIAL_COUNT && !showAll) {
+        if (filteredIncidents.length > INITIAL_COUNT && !showAll) {
             showMoreBtn.style.display = 'block';
-            showMoreBtn.textContent = `Show More (${incidents.length - INITIAL_COUNT} more)`;
-        } else if (incidents.length > INITIAL_COUNT && showAll) {
+            showMoreBtn.textContent = `Show More (${filteredIncidents.length - INITIAL_COUNT} more)`;
+        } else if (filteredIncidents.length > INITIAL_COUNT && showAll) {
             showMoreBtn.style.display = 'block';
             showMoreBtn.textContent = 'Show Less';
         } else {
             showMoreBtn.style.display = 'none';
+        }
+    }
+
+    renderSummary(summary) {
+        const summaryCard = document.getElementById('incidentsSummary');
+
+        if (!summary || summary.total_incidents === 0) {
+            summaryCard.style.display = 'none';
+            return;
+        }
+
+        summaryCard.style.display = 'grid';
+
+        document.getElementById('summaryTotalIncidents').textContent = summary.total_incidents;
+        document.getElementById('summaryOngoing').textContent = summary.ongoing_count;
+        document.getElementById('summaryResolved').textContent = summary.resolved_count;
+        document.getElementById('summaryDowntime').textContent = summary.total_downtime;
+
+        const mostAffectedEl = document.getElementById('summaryMostAffected');
+        if (summary.most_affected_target) {
+            mostAffectedEl.innerHTML = `${summary.most_affected_target} <span class="incident-count-small">(${summary.most_affected_count} incidents)</span>`;
+        } else {
+            mostAffectedEl.textContent = '—';
         }
     }
 

@@ -2246,6 +2246,16 @@ body.light-mode .uptime-bar-container {
     font-weight: 700;
 }
 
+/* Sidebar nav icons */
+.sidebar-nav-item span[class^="icon-"] {
+    margin-right: 10px;
+    font-size: 1.1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
 /* Mobile sidebar adjustments */
 @media (max-width: 768px) {
     /* Hide Timeline tab on mobile devices */
@@ -2305,13 +2315,19 @@ body.light-mode .uptime-bar-container {
 }
 
 .sidebar-sort label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
+}
+
+.sidebar-sort label span[class^="icon-"] {
+    font-size: 1.1em;
 }
 
 .sidebar-sort select {
@@ -3632,10 +3648,26 @@ header {
     font-size: 0.95rem;
 }
 
+/* Uptime Header */
+.uptime-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.uptime-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
 .uptime-filters {
     display: flex !important;
     gap: 10px;
-    margin-bottom: 24px;
 }
 
 .uptime-filter-btn {
@@ -3647,6 +3679,7 @@ header {
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 500;
+    line-height: 1.5;
     transition: all 0.2s ease;
 }
 
@@ -4541,6 +4574,8 @@ body.light-mode .uptime-bar-track {
 .icon-pause::before { content: "⏸"; }
 .icon-library::before { content: "☰"; }
 .icon-bell-off::before { content: "⊘"; color: #f4c430; } /* Circle with slash - yellow */
+.icon-timeline::before { content: "◴"; }
+.icon-sort::before { content: "⇅"; }
 
 /* Status icons */
 .icon-up::before { content: "▲"; color: var(--success); }
@@ -4548,7 +4583,7 @@ body.light-mode .uptime-bar-track {
 .icon-unknown::before { content: "?"; color: var(--unknown); }
 .icon-check::before { content: "✓"; color: var(--success); }
 .icon-cross::before { content: "✕"; color: var(--danger); }
-.icon-warning::before { content: "!"; color: var(--warning); }
+.icon-warning::before { content: "⚠"; }
 
 /* Navigation icon styling */
 .nav-icon {
@@ -6480,16 +6515,14 @@ input[type="checkbox"]:checked {
    ======================================== */
 
 .incidents-dashboard {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
+    padding: 30px;
 }
 
 .incidents-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 16px;
 }
@@ -6501,34 +6534,129 @@ input[type="checkbox"]:checked {
     margin: 0;
 }
 
+.incidents-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.incidents-status-filter {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+}
+
+.incidents-status-filter:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary);
+    color: var(--text-primary);
+}
+
+.incidents-status-filter:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-tertiary);
+}
+
 .incidents-filters {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .incidents-filter-btn {
-    background: rgba(0, 240, 255, 0.05);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
     padding: 8px 16px;
-    border-radius: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
     transition: all 0.2s ease;
 }
 
 .incidents-filter-btn:hover {
-    background: rgba(0, 240, 255, 0.1);
+    background: var(--bg-tertiary);
     border-color: var(--primary);
-    color: var(--primary);
+    color: var(--text-primary);
 }
 
 .incidents-filter-btn.active {
-    background: rgba(0, 240, 255, 0.15);
+    background: var(--primary);
+    color: white;
     border-color: var(--primary);
-    color: var(--primary);
-    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Summary Stats Card */
+.incidents-summary {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin-bottom: 32px;
+    padding: 20px 0;
+    background: rgba(15, 20, 31, 0.4);
+    border: 1px solid var(--border);
+}
+
+.summary-stat {
+    text-align: center;
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+}
+
+.summary-stat:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 50%;
+    width: 1px;
+    background: var(--border-light);
+}
+
+.summary-stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    order: 1;
+}
+
+.summary-stat-value {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    order: 2;
+    line-height: 1;
+}
+
+.summary-stat-value.ongoing {
+    color: var(--warning);
+}
+
+.summary-stat-value.resolved {
+    color: var(--success);
+}
+
+.incident-count-small {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    opacity: 0.8;
 }
 
 /* Incidents Container */
@@ -6667,6 +6795,46 @@ input[type="checkbox"]:checked {
     box-shadow: 0 0 10px var(--primary-glow);
 }
 
+/* Light Mode - Incidents Tab */
+body.light-mode .incidents-summary {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+body.light-mode .incident-item {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .incident-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 20px rgba(37, 99, 235, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+body.light-mode .incident-item:last-child {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .show-more-btn {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .show-more-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 20px rgba(37, 99, 235, 0.1);
+}
+
 /* Settings description helper text */
 .settings-description {
     color: var(--text-secondary);
@@ -6676,9 +6844,29 @@ input[type="checkbox"]:checked {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    .uptime-header,
     .incidents-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .uptime-filters {
+        width: 100%;
+    }
+
+    .uptime-filter-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .incidents-controls {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .incidents-status-filter {
+        width: 100%;
     }
 
     .incidents-filters {
@@ -6688,6 +6876,20 @@ input[type="checkbox"]:checked {
     .incidents-filter-btn {
         flex: 1;
         text-align: center;
+    }
+
+    .incidents-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .summary-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .summary-stat-label {
+        font-size: 0.7rem;
     }
 
     .incident-meta {

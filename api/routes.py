@@ -548,7 +548,7 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
 
         # Get all targets
         all_targets = await db.get_all_targets()
-        target_map = {t['id']: t['name'] for t in all_targets}
+        target_map = {t['id']: {'name': t['name'], 'device_type': t.get('device_type', 'other')} for t in all_targets}
 
         # Get all recent alerts
         all_alerts = await db.get_alert_log(limit=1000)
@@ -573,7 +573,9 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
                 continue
 
             target_id = alert['target_id']
-            target_name = target_map.get(target_id, 'Unknown Target')
+            target_info = target_map.get(target_id, {'name': 'Unknown Target', 'device_type': 'other'})
+            target_name = target_info['name']
+            device_type = target_info['device_type']
             event_type = alert.get('event_type', '')
 
             if event_type == 'threshold_reached':
@@ -584,6 +586,7 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
                         'id': alert.get('id'),
                         'target_id': target_id,
                         'target_name': target_name,
+                        'device_type': device_type,
                         'title': f"Outage: {target_name}",
                         'started_at': alert['timestamp'],
                         'resolved_at': None,
@@ -604,16 +607,29 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
 
         # Calculate durations and format incidents
         formatted_incidents = []
+        total_downtime_seconds = 0
+        ongoing_count = 0
+        resolved_count = 0
+        target_incident_counts = {}  # Track incidents per target
+
         for incident in incidents_list:
             started_at = datetime.fromisoformat(incident['started_at'].replace('Z', '+00:00'))
 
             if incident['resolved_at']:
                 resolved_at = datetime.fromisoformat(incident['resolved_at'].replace('Z', '+00:00'))
                 duration_seconds = (resolved_at - started_at).total_seconds()
+                resolved_count += 1
             else:
                 # Still ongoing
                 duration_seconds = (datetime.now(timezone.utc).replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
                 incident['status'] = 'ongoing'
+                ongoing_count += 1
+
+            total_downtime_seconds += duration_seconds
+
+            # Track incident count per target
+            target_name = incident['target_name']
+            target_incident_counts[target_name] = target_incident_counts.get(target_name, 0) + 1
 
             # Format duration
             if duration_seconds < 60:
@@ -634,17 +650,48 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
                 'id': incident['id'],
                 'title': incident['title'],
                 'target_name': incident['target_name'],
+                'device_type': incident.get('device_type', 'other'),
                 'started_at': incident['started_at'],
                 'resolved_at': incident['resolved_at'],
                 'duration': duration_str,
                 'status': incident['status']
             })
 
+        # Format total downtime
+        if total_downtime_seconds < 60:
+            total_downtime_str = f"{int(total_downtime_seconds)}s"
+        elif total_downtime_seconds < 3600:
+            minutes = int(total_downtime_seconds / 60)
+            total_downtime_str = f"{minutes}m"
+        elif total_downtime_seconds < 86400:
+            hours = int(total_downtime_seconds / 3600)
+            minutes = int((total_downtime_seconds % 3600) / 60)
+            total_downtime_str = f"{hours}h {minutes}m" if minutes > 0 else f"{hours}h"
+        else:
+            days_count = int(total_downtime_seconds / 86400)
+            hours = int((total_downtime_seconds % 86400) / 3600)
+            total_downtime_str = f"{days_count}d {hours}h" if hours > 0 else f"{days_count}d"
+
+        # Find most affected target
+        most_affected_target = None
+        most_affected_count = 0
+        if target_incident_counts:
+            most_affected_target = max(target_incident_counts, key=target_incident_counts.get)
+            most_affected_count = target_incident_counts[most_affected_target]
+
         return {
             'success': True,
             'incidents': formatted_incidents,
             'count': len(formatted_incidents),
-            'days': days
+            'days': days,
+            'summary': {
+                'total_incidents': len(formatted_incidents),
+                'ongoing_count': ongoing_count,
+                'resolved_count': resolved_count,
+                'total_downtime': total_downtime_str,
+                'most_affected_target': most_affected_target,
+                'most_affected_count': most_affected_count
+            }
         }
 
     except Exception as e:

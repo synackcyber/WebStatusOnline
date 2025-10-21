@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebStatus - System Monitor</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=1760817532">
+    <link rel="stylesheet" href="/static/css/style.css?v=1760817546">
 </head>
 <body>
     <!-- Hamburger Menu Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h1>WebStatus</h1>
+            <h1>WebStatus.Online</h1>
             <button class="close-sidebar-btn" id="closeSidebarBtn">&times;</button>
         </div>
 
@@ -256,11 +256,15 @@
         <!-- Timeline Tab -->
         <div class="tab-content" id="uptime">
             <div class="uptime-dashboard">
-                <div class="uptime-filters">
-                    <button class="uptime-filter-btn active" data-range="24h">24 Hours</button>
-                    <button class="uptime-filter-btn" data-range="7d">7 Days</button>
-                    <button class="uptime-filter-btn" data-range="30d">30 Days</button>
-                    <button class="uptime-filter-btn" data-range="90d">90 Days</button>
+                <!-- Header -->
+                <div class="uptime-header">
+                    <h2>Timeline</h2>
+                    <div class="uptime-filters">
+                        <button class="uptime-filter-btn active" data-range="24h">24 Hours</button>
+                        <button class="uptime-filter-btn" data-range="7d">7 Days</button>
+                        <button class="uptime-filter-btn" data-range="30d">30 Days</button>
+                        <button class="uptime-filter-btn" data-range="90d">90 Days</button>
+                    </div>
                 </div>
                 <div class="uptime-grid" id="uptimeGrid">
                     <div class="loading">Loading uptime data...</div>
@@ -274,10 +278,41 @@
                 <!-- Header -->
                 <div class="incidents-header">
                     <h2>Recent Incidents</h2>
-                    <div class="incidents-filters">
-                        <button class="incidents-filter-btn" data-days="7">7 Days</button>
-                        <button class="incidents-filter-btn active" data-days="14">14 Days</button>
-                        <button class="incidents-filter-btn" data-days="30">30 Days</button>
+                    <div class="incidents-controls">
+                        <select id="incidentsStatusFilter" class="incidents-status-filter">
+                            <option value="all">All Incidents</option>
+                            <option value="ongoing">Ongoing Only</option>
+                            <option value="resolved">Resolved Only</option>
+                        </select>
+                        <div class="incidents-filters">
+                            <button class="uptime-filter-btn incidents-filter-btn" data-days="7">7 Days</button>
+                            <button class="uptime-filter-btn incidents-filter-btn active" data-days="14">14 Days</button>
+                            <button class="uptime-filter-btn incidents-filter-btn" data-days="30">30 Days</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Stats Card -->
+                <div class="incidents-summary" id="incidentsSummary" style="display: none;">
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="summaryTotalIncidents">0</div>
+                        <div class="summary-stat-label">Total Incidents</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value ongoing" id="summaryOngoing">0</div>
+                        <div class="summary-stat-label">Ongoing</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value resolved" id="summaryResolved">0</div>
+                        <div class="summary-stat-label">Resolved</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="summaryDowntime">0h</div>
+                        <div class="summary-stat-label">Total Downtime</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="summaryMostAffected">—</div>
+                        <div class="summary-stat-label">Most Affected</div>
                     </div>
                 </div>
 
@@ -816,6 +851,6 @@
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
 
-    <script src="/static/js/app-new.js?v=1760817532"></script>
+    <script src="/static/js/app-new.js?v=1760817534"></script>
 </body>
 </html>
