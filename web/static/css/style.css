@@ -140,6 +140,10 @@ body.light-mode .metric-uptime {
     text-shadow: none;
 }
 
+body.light-mode .uptime-metric-value {
+    text-shadow: none;
+}
+
 /* Light mode glass cards - inverted glass effect */
 body.light-mode .compact-card {
     background: rgba(255, 255, 255, 0.7);
@@ -4127,12 +4131,19 @@ body.light-mode .uptime-bar-track {
     border-radius: 8px;
     margin-bottom: 25px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 30px;
     text-align: center;
+}
+
+.discovery-progress[style*="display: none"] {
+    display: none !important;
+}
+
+.discovery-progress:not([style*="display: none"]) {
+    display: flex !important;
 }
 
 .progress-text {

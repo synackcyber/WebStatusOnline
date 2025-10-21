@@ -1205,7 +1205,7 @@ class WebStatusApp {
                 <!-- Industry Standard Uptime Metrics -->
                 ${target.uptime ? `
                 <div class="detail-uptime-section">
-                    <div class="detail-section-title">Uptime (Industry Standard)</div>
+                    <div class="detail-section-title">Uptime</div>
                     <div class="uptime-metrics-grid">
                         <div class="uptime-metric">
                             <div class="uptime-metric-label">Last 24 Hours</div>
