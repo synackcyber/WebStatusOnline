@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebStatus - System Monitor</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=1760817530">
+    <link rel="stylesheet" href="/static/css/style.css?v=1760817531">
 </head>
 <body>
     <!-- Hamburger Menu Sidebar -->
@@ -34,6 +34,22 @@
                 <span class="nav-label">Settings</span>
             </button>
         </nav>
+
+        <div class="sidebar-sort">
+            <label>Sort Dashboard</label>
+            <select id="dashboardSortSelect">
+                <option value="smart" selected>Smart Sort (Default)</option>
+                <option value="name-asc">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="status-down">Status (Down First)</option>
+                <option value="status-up">Status (Up First)</option>
+                <option value="device-type">Device Type</option>
+                <option value="uptime-worst">Uptime (Worst First)</option>
+                <option value="uptime-best">Uptime (Best First)</option>
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+        </div>
 
         <div class="sidebar-actions">
             <button class="btn btn-primary btn-block" id="sidebarAddTargetBtn">
@@ -785,6 +801,6 @@
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
 
-    <script src="/static/js/app-new.js?v=1760817529"></script>
+    <script src="/static/js/app-new.js?v=1760817531"></script>
 </body>
 </html>

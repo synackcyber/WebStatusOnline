@@ -2299,6 +2299,45 @@ body.light-mode .uptime-bar-container {
     }
 }
 
+.sidebar-sort {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-sort label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.sidebar-sort select {
+    width: 100%;
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-sort select:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: var(--primary);
+    box-shadow: inset 0 0 10px var(--primary-glow);
+}
+
+.sidebar-sort select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
 .sidebar-actions {
     padding: 20px;
     display: flex !important;

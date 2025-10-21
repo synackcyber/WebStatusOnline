@@ -18,6 +18,7 @@ class WebStatusApp {
         this.uptimeTimeRange = '24h'; // Default time range for uptime report
         this.devicePresets = {}; // Device type presets for auto-configuration
         this.features = {}; // Feature flags (loaded from backend)
+        this.dashboardSortMethod = 'smart'; // Default sort method for dashboard
 
         // Audio management for autoplay compatibility
         this.audioElements = {}; // Pre-loaded audio elements
@@ -601,6 +602,24 @@ class WebStatusApp {
         document.getElementById('exportJsonBtn')?.addEventListener('click', () => this.exportEventsJson());
         document.getElementById('applyFiltersBtn')?.addEventListener('click', () => this.applyEventFilters());
 
+        // Dashboard sort dropdown
+        const dashboardSortSelect = document.getElementById('dashboardSortSelect');
+        if (dashboardSortSelect) {
+            // Load saved sort preference from localStorage
+            const savedSort = localStorage.getItem('webstatus_dashboard_sort');
+            if (savedSort) {
+                this.dashboardSortMethod = savedSort;
+                dashboardSortSelect.value = savedSort;
+            }
+
+            // Sort dropdown change handler
+            dashboardSortSelect.addEventListener('change', (e) => {
+                this.dashboardSortMethod = e.target.value;
+                localStorage.setItem('webstatus_dashboard_sort', e.target.value);
+                this.loadDashboard(); // Re-render with new sort
+            });
+        }
+
         // Uptime filter buttons
         document.querySelectorAll('.uptime-filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -914,17 +933,20 @@ class WebStatusApp {
             return;
         }
 
+        // Sort targets based on current sort method
+        const sortedTargets = this.sortTargets([...targets], this.dashboardSortMethod);
+
         // Store targets with uptime data for detail panel
-        this.targetsWithUptime = targets;
+        this.targetsWithUptime = sortedTargets;
 
         // Check if we need to do a full re-render or just update existing cards
         const existingCards = grid.querySelectorAll('.compact-card');
-        const needsFullRender = existingCards.length !== targets.length ||
-                                !this.canUpdateInPlace(existingCards, targets);
+        const needsFullRender = existingCards.length !== sortedTargets.length ||
+                                !this.canUpdateInPlace(existingCards, sortedTargets);
 
         if (needsFullRender) {
             // Full render: new targets added/removed or first load
-            grid.innerHTML = targets.map(target => this.createCompactCard(target)).join('');
+            grid.innerHTML = sortedTargets.map(target => this.createCompactCard(target)).join('');
 
             // Add click listeners to cards
             const cards = grid.querySelectorAll('.compact-card');
@@ -939,7 +961,7 @@ class WebStatusApp {
             this.addStaggeredAnimation(Array.from(cards), 'slide-in');
         } else {
             // In-place update: just update the content of existing cards
-            this.updateCardsInPlace(existingCards, targets);
+            this.updateCardsInPlace(existingCards, sortedTargets);
         }
     }
 
@@ -976,6 +998,86 @@ class WebStatusApp {
 
         // NO slide-in animation on refresh - cards are already visible
         // Animation only happens on full render (new targets added)
+    }
+
+    sortTargets(targets, method) {
+        const deviceTypePriority = {
+            'server': 1,
+            'network': 2,
+            'workstation': 3,
+            'mobile': 4,
+            'printer': 5,
+            'iot': 6,
+            'storage': 7,
+            'other': 8
+        };
+
+        const statusPriority = {
+            'down': 1,
+            'unknown': 2,
+            'up': 3
+        };
+
+        switch (method) {
+            case 'smart':
+                // Priority: Status (down first) → Device Type → Name (A-Z)
+                return targets.sort((a, b) => {
+                    const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+                    if (statusDiff !== 0) return statusDiff;
+
+                    const deviceDiff = deviceTypePriority[a.device_type || 'other'] - deviceTypePriority[b.device_type || 'other'];
+                    if (deviceDiff !== 0) return deviceDiff;
+
+                    return a.name.localeCompare(b.name);
+                });
+
+            case 'name-asc':
+                return targets.sort((a, b) => a.name.localeCompare(b.name));
+
+            case 'name-desc':
+                return targets.sort((a, b) => b.name.localeCompare(a.name));
+
+            case 'status-down':
+                return targets.sort((a, b) => {
+                    const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+                    return statusDiff !== 0 ? statusDiff : a.name.localeCompare(b.name);
+                });
+
+            case 'status-up':
+                return targets.sort((a, b) => {
+                    const statusDiff = statusPriority[b.status] - statusPriority[a.status];
+                    return statusDiff !== 0 ? statusDiff : a.name.localeCompare(b.name);
+                });
+
+            case 'device-type':
+                return targets.sort((a, b) => {
+                    const deviceDiff = deviceTypePriority[a.device_type || 'other'] - deviceTypePriority[b.device_type || 'other'];
+                    return deviceDiff !== 0 ? deviceDiff : a.name.localeCompare(b.name);
+                });
+
+            case 'uptime-worst':
+                return targets.sort((a, b) => {
+                    const uptimeA = a.uptime?.uptime_24h || 100;
+                    const uptimeB = b.uptime?.uptime_24h || 100;
+                    return uptimeA - uptimeB;
+                });
+
+            case 'uptime-best':
+                return targets.sort((a, b) => {
+                    const uptimeA = a.uptime?.uptime_24h || 0;
+                    const uptimeB = b.uptime?.uptime_24h || 0;
+                    return uptimeB - uptimeA;
+                });
+
+            case 'newest':
+                return targets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            case 'oldest':
+                return targets.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            default:
+                return targets;
+        }
     }
 
     createCompactCard(target) {
