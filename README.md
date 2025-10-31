@@ -428,4 +428,4 @@ Built with:
 
 ---
 
-**Happy Monitoring!** 🚨📡
+**Happy Monitoring!**
