@@ -439,6 +439,15 @@ async def lifespan(app: FastAPI):
     from auth.middleware import set_auth_manager
     set_auth_manager(auth_manager)
 
+    # Check for password reset via environment variable
+    admin_password = os.getenv('ADMIN_PASSWORD')
+    if admin_password:
+        success, message = await auth_manager.reset_password(admin_password)
+        if success:
+            logger.info(f"🔑 {message}")
+        else:
+            logger.warning(f"⚠️  Password reset failed: {message}")
+
     setup_required = await auth_manager.setup_required()
     if setup_required:
         logger.warning("⚠️  SETUP REQUIRED - Visit /auth/setup to create admin account")

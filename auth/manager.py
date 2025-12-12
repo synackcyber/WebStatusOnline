@@ -331,6 +331,65 @@ class AuthManager:
 
         return deleted_count
 
+    async def reset_password(self, new_password: str) -> Tuple[bool, str]:
+        """
+        Reset the password for the existing user (single-user system).
+
+        Used for emergency password recovery via ADMIN_PASSWORD env var.
+
+        Args:
+            new_password: New password (8-128 chars)
+
+        Returns:
+            Tuple of (success, message)
+        """
+        # Get the single user
+        conn = await self.db._get_connection()
+        async with conn.execute(
+            "SELECT id, username FROM users LIMIT 1"
+        ) as cursor:
+            user = await cursor.fetchone()
+
+        if not user:
+            return False, "No user exists - use setup page to create account"
+
+        user_id, username = user
+
+        # Validate password strength
+        is_valid, error_msg = self.password_manager.validate_password_strength(new_password)
+        if not is_valid:
+            await self._log_audit_event(
+                user_id, username, "password_reset", None, False, error_msg
+            )
+            return False, error_msg
+
+        # Hash new password
+        try:
+            password_hash = self.password_manager.hash_password(new_password)
+        except Exception as e:
+            logger.error(f"Failed to hash password: {e}")
+            return False, "Internal error"
+
+        # Update password
+        try:
+            await conn.execute(
+                "UPDATE users SET password_hash = ? WHERE id = ?",
+                (password_hash, user_id)
+            )
+            await conn.commit()
+
+            await self._log_audit_event(
+                user_id, username, "password_reset", None, True, None
+            )
+
+            logger.info(f"Password reset for user: {username}")
+            return True, f"Password reset successfully for user '{username}'"
+
+        except Exception as e:
+            logger.error(f"Failed to reset password: {e}")
+            await conn.rollback()
+            return False, "Failed to reset password"
+
     async def _log_audit_event(
         self,
         user_id: Optional[int],
