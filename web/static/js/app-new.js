@@ -1121,18 +1121,15 @@ class WebStatusApp {
         // Random animation delay for LED to desynchronize them (0-500ms)
         const ledDelay = Math.random() * 0.5;
 
-        // Uptime metrics (industry standard)
+        // Uptime metrics with status LED
         let uptimeHtml = '';
         if (target.uptime) {
             const uptime = target.uptime.uptime_24h;
             const uptimeClass = uptime >= 99.9 ? 'uptime-excellent' : uptime >= 99 ? 'uptime-good' : 'uptime-poor';
-            const currentDuration = target.uptime.current_duration_formatted || target.current_uptime_formatted || target.current_downtime_formatted || '0s';
-
-            const durationIcon = statusClass === 'up' ? '<span class="icon-up"></span>' : '<span class="icon-down"></span>';
             uptimeHtml = `
                 <div class="compact-card-metrics">
                     <span class="metric-uptime ${uptimeClass}" title="24-hour uptime">${uptime}% (24h)</span>
-                    <span class="metric-duration">${durationIcon} ${currentDuration}</span>
+                    <span class="port-led led-${statusClass}" style="animation-delay: -${ledDelay}s;" title="Link Status"></span>
                 </div>
             `;
         }
@@ -1148,10 +1145,7 @@ class WebStatusApp {
                 </div>
                 ${uptimeHtml}
                 <div class="compact-card-footer">
-                    <div class="compact-card-type-with-led">
-                        <span class="port-led led-${statusClass}" style="animation-delay: -${ledDelay}s;" title="Link Status"></span>
-                        <span class="compact-card-type">${target.type}</span>
-                    </div>
+                    <span class="compact-card-type">${target.type}</span>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         ${audioMutedIcon}
                         ${ackIcon}
