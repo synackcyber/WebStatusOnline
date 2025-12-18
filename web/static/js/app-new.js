@@ -725,6 +725,7 @@ class WebStatusApp {
         // API key management buttons
         document.getElementById('generateApiKeyBtn')?.addEventListener('click', () => this.openGenerateApiKeyModal());
         document.getElementById('confirmGenerateApiKeyBtn')?.addEventListener('click', () => this.createApiKey());
+        document.getElementById('viewApiDocsBtn')?.addEventListener('click', () => this.openApiDocsModal());
     }
 
     openSidebar() {
@@ -1356,8 +1357,6 @@ class WebStatusApp {
             this.stopEventLogRefresh();
         } else if (tab === 'discovery') {
             this.initDiscoveryTab();
-            this.stopEventLogRefresh();
-        } else if (tab === 'api-docs') {
             this.stopEventLogRefresh();
         }
     }
@@ -2037,6 +2036,16 @@ class WebStatusApp {
             console.error('Failed to copy:', err);
             this.showToast('Failed to copy to clipboard', 'error');
         });
+    }
+
+    openApiDocsModal() {
+        document.getElementById('apiDocsModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeApiDocsModal() {
+        document.getElementById('apiDocsModal').style.display = 'none';
+        document.body.style.overflow = '';
     }
 
     // API Helper Methods

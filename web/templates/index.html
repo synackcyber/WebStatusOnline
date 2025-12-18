@@ -33,9 +33,6 @@
             <button class="sidebar-nav-item" data-tab="settings">
                 <span class="nav-label">Settings</span>
             </button>
-            <button class="sidebar-nav-item" data-tab="api-docs">
-                <span class="nav-label">API Docs</span>
-            </button>
         </nav>
 
         <div class="sidebar-sort">
@@ -501,6 +498,9 @@
                         <h3>API Keys</h3>
                         <div style="display: flex; align-items: center; gap: 16px;">
                             <span class="card-badge" id="apiKeysCount">0 keys</span>
+                            <button class="btn btn-secondary btn-small" id="viewApiDocsBtn">
+                                View API Docs
+                            </button>
                             <button class="btn btn-primary btn-small" id="generateApiKeyBtn">
                                 <span class="icon-plus"></span> Generate New API Key
                             </button>
@@ -928,14 +928,17 @@
             </div>
         </div>
 
-        <!-- API Documentation Tab -->
-        <div class="tab-content" id="api-docs">
-            <div class="api-docs-container">
-                <div class="api-docs-header">
-                    <h1>API Documentation</h1>
-                    <p class="api-docs-subtitle">Integrate PiAlert with external systems using the REST API</p>
-                </div>
+    </div>
+    <!-- End Main Content -->
 
+    <!-- API Documentation Modal -->
+    <div class="api-docs-modal" id="apiDocsModal" style="display: none;">
+        <div class="api-docs-modal-content">
+            <div class="api-docs-modal-header">
+                <h2>API Documentation</h2>
+                <button class="modal-close" onclick="app.closeApiDocsModal()">&times;</button>
+            </div>
+            <div class="api-docs-container">
                 <!-- Overview Section -->
                 <div class="api-docs-section">
                     <h2>Overview</h2>
@@ -954,9 +957,7 @@
 
                         <h3>Generate an API Key</h3>
                         <ol>
-                            <li>Go to <a href="#" onclick="app.switchTab('settings'); return false;">Settings</a></li>
-                            <li>Scroll to the <strong>API Keys</strong> section</li>
-                            <li>Click <strong>Generate New API Key</strong></li>
+                            <li>Close this dialog and click <strong>Generate New API Key</strong> button</li>
                             <li>Give your key a name (e.g., "Home Assistant", "Node-RED")</li>
                             <li>Copy the key immediately (it won't be shown again)</li>
                         </ol>
@@ -1022,57 +1023,25 @@
                         <h3>Response Fields</h3>
                         <table class="api-docs-table">
                             <thead>
-                                <tr>
-                                    <th>Field</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                </tr>
+                                <tr><th>Field</th><th>Type</th><th>Description</th></tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>alert</code></td>
-                                    <td>boolean</td>
-                                    <td><code>true</code> if ANY target is currently failing, <code>false</code> if all OK</td>
-                                </tr>
-                                <tr>
-                                    <td><code>failing_targets</code></td>
-                                    <td>array</td>
-                                    <td>List of targets currently exceeding their failure threshold</td>
-                                </tr>
-                                <tr>
-                                    <td><code>failing_count</code></td>
-                                    <td>integer</td>
-                                    <td>Number of failing targets</td>
-                                </tr>
-                                <tr>
-                                    <td><code>timestamp</code></td>
-                                    <td>string</td>
-                                    <td>ISO 8601 UTC timestamp</td>
-                                </tr>
+                                <tr><td><code>alert</code></td><td>boolean</td><td><code>true</code> if ANY target is failing</td></tr>
+                                <tr><td><code>failing_targets</code></td><td>array</td><td>List of failing targets</td></tr>
+                                <tr><td><code>failing_count</code></td><td>integer</td><td>Number of failing targets</td></tr>
+                                <tr><td><code>timestamp</code></td><td>string</td><td>ISO 8601 UTC timestamp</td></tr>
                             </tbody>
                         </table>
 
                         <h3>Error Responses</h3>
                         <table class="api-docs-table">
                             <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Description</th>
-                                </tr>
+                                <tr><th>Status</th><th>Description</th></tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>401</code></td>
-                                    <td>Missing or invalid API key</td>
-                                </tr>
-                                <tr>
-                                    <td><code>429</code></td>
-                                    <td>Rate limit exceeded (check <code>Retry-After</code> header)</td>
-                                </tr>
-                                <tr>
-                                    <td><code>500</code></td>
-                                    <td>Internal server error</td>
-                                </tr>
+                                <tr><td><code>401</code></td><td>Missing or invalid API key</td></tr>
+                                <tr><td><code>429</code></td><td>Rate limit exceeded</td></tr>
+                                <tr><td><code>500</code></td><td>Internal server error</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1084,26 +1053,14 @@
                     <div class="api-docs-card">
                         <table class="api-docs-table">
                             <thead>
-                                <tr>
-                                    <th>Limit Type</th>
-                                    <th>Rate</th>
-                                    <th>Notes</th>
-                                </tr>
+                                <tr><th>Limit Type</th><th>Rate</th><th>Notes</th></tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Valid API Key</td>
-                                    <td>120 requests/minute</td>
-                                    <td>Per API key - allows polling every 30 seconds with headroom</td>
-                                </tr>
-                                <tr>
-                                    <td>Failed Auth</td>
-                                    <td>10 attempts/minute</td>
-                                    <td>Per IP address - prevents brute force attacks</td>
-                                </tr>
+                                <tr><td>Valid API Key</td><td>120 req/min</td><td>Per API key</td></tr>
+                                <tr><td>Failed Auth</td><td>10 attempts/min</td><td>Per IP address</td></tr>
                             </tbody>
                         </table>
-                        <p>When rate limited, responses include a <code>Retry-After</code> header indicating seconds until reset.</p>
+                        <p>When rate limited, check the <code>Retry-After</code> header.</p>
                     </div>
                 </div>
 
@@ -1111,7 +1068,6 @@
                 <div class="api-docs-section">
                     <h2>Integration Examples</h2>
 
-                    <!-- Home Assistant -->
                     <div class="api-docs-card api-docs-collapsible">
                         <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
                             <h3>Home Assistant</h3>
@@ -1131,139 +1087,47 @@
     scan_interval: 30
     sensor:
       - name: "PiAlert Status"
-        value_template: "{{ 'Alert' if value_json.alert else 'OK' }}"
-        json_attributes:
-          - failing_count
-          - failing_targets
-          - timestamp
-
-binary_sensor:
-  - platform: template
-    sensors:
-      pialert_alert:
-        friendly_name: "PiAlert Alert"
-        value_template: "{{ state_attr('sensor.pialert_status', 'alert') }}"
-        device_class: problem</code></pre>
+        value_template: "{{ 'Alert' if value_json.alert else 'OK' }}"</code></pre>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Node-RED -->
-                    <div class="api-docs-card api-docs-collapsible">
-                        <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
-                            <h3>Node-RED</h3>
-                            <span class="collapse-icon">+</span>
-                        </div>
-                        <div class="collapsible-content">
-                            <p>Use an HTTP Request node with these settings:</p>
-                            <div class="api-docs-code-block">
-                                <div class="code-header">
-                                    <span>HTTP Request Node Config</span>
-                                    <button class="btn-copy" onclick="app.copyToClipboard(this.parentElement.nextElementSibling.textContent)">Copy</button>
-                                </div>
-                                <pre><code>{
-  "method": "GET",
-  "url": "http://your-server:8000/api/v1/alert-status",
-  "headers": {
-    "x-api-key": "your-api-key-here"
-  }
-}</code></pre>
-                            </div>
-                            <p>Then use a Function node to process the response:</p>
-                            <div class="api-docs-code-block">
-                                <div class="code-header">
-                                    <span>Function Node</span>
-                                    <button class="btn-copy" onclick="app.copyToClipboard(this.parentElement.nextElementSibling.textContent)">Copy</button>
-                                </div>
-                                <pre><code>if (msg.payload.alert) {
-    msg.payload = {
-        text: `⚠️ ${msg.payload.failing_count} targets are down!`,
-        targets: msg.payload.failing_targets
-    };
-    return msg;
-}
-return null; // No alert</code></pre>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Python -->
                     <div class="api-docs-card api-docs-collapsible">
                         <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
                             <h3>Python Script</h3>
                             <span class="collapse-icon">+</span>
                         </div>
                         <div class="collapsible-content">
-                            <p>Poll the API and trigger actions based on alert state:</p>
                             <div class="api-docs-code-block">
                                 <div class="code-header">
                                     <span>monitor.py</span>
                                     <button class="btn-copy" onclick="app.copyToClipboard(this.parentElement.nextElementSibling.textContent)">Copy</button>
                                 </div>
-                                <pre><code>#!/usr/bin/env python3
-import requests
-import time
-
-API_URL = "http://your-server:8000/api/v1/alert-status"
-API_KEY = "your-api-key-here"
-POLL_INTERVAL = 30  # seconds
-
-while True:
-    try:
-        response = requests.get(
-            API_URL,
-            headers={"x-api-key": API_KEY},
-            timeout=5
-        )
-
-        if response.status_code == 200:
-            data = response.json()
-
-            if data["alert"]:
-                print(f"ALERT: {data['failing_count']} targets down")
-                for target in data["failing_targets"]:
-                    print(f"  - {target['name']}: {target['failures']}/{target['threshold']} failures")
-            else:
-                print("All systems operational")
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-    time.sleep(POLL_INTERVAL)</code></pre>
+                                <pre><code>import requests
+response = requests.get(
+    "http://your-server:8000/api/v1/alert-status",
+    headers={"x-api-key": "your-api-key"}
+)
+data = response.json()
+if data["alert"]:
+    print(f"ALERT: {data['failing_count']} targets down")</code></pre>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Bash -->
                     <div class="api-docs-card api-docs-collapsible">
                         <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
                             <h3>Bash Script</h3>
                             <span class="collapse-icon">+</span>
                         </div>
                         <div class="collapsible-content">
-                            <p>Simple script for cron jobs or monitoring:</p>
                             <div class="api-docs-code-block">
                                 <div class="code-header">
                                     <span>check_status.sh</span>
                                     <button class="btn-copy" onclick="app.copyToClipboard(this.parentElement.nextElementSibling.textContent)">Copy</button>
                                 </div>
-                                <pre><code>#!/bin/bash
-
-API_URL="http://your-server:8000/api/v1/alert-status"
-API_KEY="your-api-key-here"
-
-response=$(curl -s -H "x-api-key: $API_KEY" "$API_URL")
-alert=$(echo "$response" | jq -r '.alert')
-count=$(echo "$response" | jq -r '.failing_count')
-
-if [ "$alert" = "true" ]; then
-    echo "ALERT: $count targets are down"
-    echo "$response" | jq -r '.failing_targets[] | "- \(.name): \(.failures)/\(.threshold) failures"'
-    exit 1
-else
-    echo "OK: All systems operational"
-    exit 0
-fi</code></pre>
+                                <pre><code>curl -s -H "x-api-key: YOUR_KEY" \
+  http://your-server:8000/api/v1/alert-status | jq</code></pre>
                             </div>
                         </div>
                     </div>
@@ -1273,74 +1137,24 @@ fi</code></pre>
                 <div class="api-docs-section">
                     <h2>Troubleshooting</h2>
                     <div class="api-docs-card">
-                        <h3>"Missing API key in x-api-key header"</h3>
-                        <p>Make sure you're including the header correctly:</p>
-                        <div class="api-docs-code-block">
-                            <pre><code># Correct
-curl -H "x-api-key: YOUR_KEY" http://...
-
-# Wrong - missing header
-curl http://...</code></pre>
-                        </div>
-
-                        <h3>"Invalid or disabled API key"</h3>
+                        <h3>"Missing API key" or "Invalid API key"</h3>
                         <ul>
-                            <li>Check that the key is copied correctly (no extra spaces)</li>
-                            <li>Verify the key hasn't been deleted</li>
-                            <li>Ensure the key is enabled (not paused)</li>
+                            <li>Ensure the <code>x-api-key</code> header is included</li>
+                            <li>Check for extra spaces in the key</li>
+                            <li>Verify the key is enabled in Settings</li>
                         </ul>
 
                         <h3>Connection Refused</h3>
                         <ul>
                             <li>Verify PiAlert is running: <code>docker compose ps</code></li>
-                            <li>Check the correct port (default: 8000)</li>
-                            <li>Ensure firewall allows connections</li>
-                        </ul>
-
-                        <h3>Empty Response</h3>
-                        <ul>
-                            <li>Targets must actually be failing to appear in <code>failing_targets</code></li>
-                            <li>Check that targets are configured and enabled</li>
-                            <li>Ensure failure thresholds are properly set</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Best Practices Section -->
-                <div class="api-docs-section">
-                    <h2>Best Practices</h2>
-                    <div class="api-docs-card">
-                        <h3>Polling Interval</h3>
-                        <ul>
-                            <li><strong>Recommended:</strong> 30 seconds</li>
-                            <li><strong>Minimum:</strong> 10 seconds</li>
-                            <li><strong>Maximum:</strong> 5 minutes (for timely alerts)</li>
-                        </ul>
-
-                        <h3>Security</h3>
-                        <ul>
-                            <li>Use <strong>HTTPS</strong> in production to encrypt API keys in transit</li>
-                            <li>Store API keys securely (environment variables, secret managers)</li>
-                            <li>Never commit API keys to version control</li>
-                            <li>Use unique keys per integration for easier revocation</li>
-                            <li>Rotate keys if compromised</li>
-                        </ul>
-
-                        <h3>Error Handling</h3>
-                        <ul>
-                            <li>Always handle network errors gracefully</li>
-                            <li>Implement exponential backoff on failures</li>
-                            <li>Check the <code>Retry-After</code> header on 429 responses</li>
-                            <li>Cache the last known state for resilience</li>
+                            <li>Check the port (default: 8000)</li>
                         </ul>
                     </div>
                 </div>
 
             </div>
         </div>
-
     </div>
-    <!-- End Main Content -->
 
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
