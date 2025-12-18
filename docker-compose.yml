@@ -23,6 +23,8 @@ services:
       - PYTHONUNBUFFERED=1
       # Feature Flags - Control feature availability
       - ENABLE_DISCOVERY=true  # Enable network discovery feature (default: true for self-hosted)
+      # Password reset - set ADMIN_PASSWORD in .env to reset admin password
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v1/status', timeout=5)"]
       interval: 30s

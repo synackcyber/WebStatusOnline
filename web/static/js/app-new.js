@@ -1363,6 +1363,8 @@ class WebStatusApp {
         } else if (tab === 'discovery') {
             this.initDiscoveryTab();
             this.stopEventLogRefresh();
+        } else if (tab === 'api-docs') {
+            this.stopEventLogRefresh();
         }
     }
 
@@ -2032,6 +2034,15 @@ class WebStatusApp {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 3000);
+    }
+
+    copyToClipboard(text) {
+        navigator.clipboard.writeText(text.trim()).then(() => {
+            this.showToast('Copied to clipboard', 'success');
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            this.showToast('Failed to copy to clipboard', 'error');
+        });
     }
 
     // API Helper Methods

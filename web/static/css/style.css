@@ -7045,3 +7045,306 @@ body.light-mode .show-more-btn:hover {
         font-size: 0.8rem;
     }
 }
+
+/* ===================================
+   API Documentation Page Styles
+   =================================== */
+
+.api-docs-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.api-docs-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.api-docs-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.api-docs-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.api-docs-section {
+    margin-bottom: 30px;
+}
+
+.api-docs-section h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.api-docs-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.api-docs-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 20px 0 10px 0;
+}
+
+.api-docs-card h3:first-child {
+    margin-top: 0;
+}
+
+.api-docs-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.api-docs-card ol,
+.api-docs-card ul {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+.api-docs-card li {
+    margin-bottom: 4px;
+}
+
+.api-docs-card code {
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.85em;
+    color: var(--primary);
+}
+
+.api-docs-card a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.api-docs-card a:hover {
+    text-decoration: underline;
+}
+
+/* Endpoint header styling */
+.endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+}
+
+.http-method {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.http-method.get {
+    background: #10b981;
+    color: white;
+}
+
+.http-method.post {
+    background: #3b82f6;
+    color: white;
+}
+
+.http-method.put {
+    background: #f59e0b;
+    color: white;
+}
+
+.http-method.delete {
+    background: #ef4444;
+    color: white;
+}
+
+.endpoint-path {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background: transparent;
+    padding: 0;
+}
+
+/* Code blocks */
+.api-docs-code-block {
+    margin: 15px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.api-docs-code-block .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.api-docs-code-block pre {
+    margin: 0;
+    padding: 15px;
+    background: var(--card-bg);
+    overflow-x: auto;
+}
+
+.api-docs-code-block code {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: transparent;
+    padding: 0;
+}
+
+.btn-copy {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copy:hover {
+    background: var(--primary-hover);
+}
+
+/* Tables */
+.api-docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.9rem;
+}
+
+.api-docs-table th,
+.api-docs-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.api-docs-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.api-docs-table td {
+    color: var(--text-secondary);
+}
+
+.api-docs-table td code {
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+/* Collapsible sections */
+.api-docs-collapsible {
+    overflow: hidden;
+}
+
+.api-docs-collapsible .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    margin: -20px;
+    padding: 20px;
+    transition: background 0.2s;
+}
+
+.api-docs-collapsible .collapsible-header:hover {
+    background: var(--bg-secondary);
+}
+
+.api-docs-collapsible .collapsible-header h3 {
+    margin: 0;
+}
+
+.api-docs-collapsible .collapse-icon {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+
+.api-docs-collapsible .collapsible-content {
+    display: none;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.api-docs-collapsible.expanded .collapsible-content {
+    display: block;
+}
+
+.api-docs-collapsible.expanded .collapse-icon {
+    transform: rotate(45deg);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .api-docs-container {
+        padding: 15px;
+    }
+
+    .api-docs-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .endpoint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .api-docs-table {
+        font-size: 0.8rem;
+    }
+
+    .api-docs-table th,
+    .api-docs-table td {
+        padding: 8px;
+    }
+
+    .api-docs-code-block pre {
+        padding: 10px;
+    }
+
+    .api-docs-code-block code {
+        font-size: 0.8rem;
+    }
+}
