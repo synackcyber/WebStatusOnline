@@ -38,9 +38,9 @@ ENV PATH=/root/.local/bin:$PATH
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check (uses httpx which is already in requirements.txt)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/api/status', timeout=5)"
+    CMD python -c "import httpx; httpx.get('http://localhost:8000/api/v1/status', timeout=5)"
 
 # Run the application
 CMD ["python", "main.py"]
