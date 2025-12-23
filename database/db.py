@@ -69,6 +69,8 @@ class Database:
                 await self._connection.execute("PRAGMA synchronous=NORMAL")
                 await self._connection.execute("PRAGMA cache_size=-64000")  # 64MB
                 await self._connection.execute("PRAGMA temp_store=MEMORY")
+                # Wait up to 5 seconds for locks instead of failing immediately
+                await self._connection.execute("PRAGMA busy_timeout=5000")
                 await self._connection.commit()
                 logger.info(f"Database connection established with WAL mode: {self.db_path}")
             return self._connection

@@ -33,6 +33,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --days)
             RETENTION_DAYS="$2"
+            # Validate RETENTION_DAYS is a positive integer (security: prevents SQL injection)
+            if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || [ "$RETENTION_DAYS" -lt 1 ]; then
+                echo "Error: --days must be a positive integer"
+                exit 1
+            fi
             shift 2
             ;;
         --help)
@@ -92,8 +97,9 @@ echo ""
 # Count records to archive
 log_info "Analyzing records to archive..."
 
-CHECK_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM check_history WHERE timestamp < '$CUTOFF_DATE';")
-ALERT_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM alert_log WHERE timestamp < '$CUTOFF_DATE';")
+# Use SQLite's datetime() for date calculation instead of string interpolation (security best practice)
+CHECK_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM check_history WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');")
+ALERT_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM alert_log WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');")
 
 log_info "Found $CHECK_COUNT check_history records to archive"
 log_info "Found $ALERT_COUNT alert_log records to archive"
@@ -108,11 +114,11 @@ log_info "Oldest records:"
 sqlite3 -header -column "$DB_PATH" "
 SELECT 'check_history' as table_name, MIN(timestamp) as oldest_record, COUNT(*) as count
 FROM check_history
-WHERE timestamp < '$CUTOFF_DATE'
+WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days')
 UNION ALL
 SELECT 'alert_log', MIN(timestamp), COUNT(*)
 FROM alert_log
-WHERE timestamp < '$CUTOFF_DATE';
+WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');
 " 2>/dev/null || log_warning "Could not fetch sample records"
 
 echo ""
@@ -139,6 +145,7 @@ ARCHIVE_DB="$ARCHIVE_DIR/archive-${TIMESTAMP}.db"
 log_info "Creating archive database: $ARCHIVE_DB"
 
 # Export old records to archive database
+# Note: RETENTION_DAYS is validated as a positive integer above (security: prevents SQL injection)
 sqlite3 "$DB_PATH" <<EOF
 -- Attach archive database
 ATTACH DATABASE '$ARCHIVE_DB' AS archive;
@@ -172,20 +179,20 @@ CREATE TABLE archive.archive_metadata (
 
 INSERT INTO archive.archive_metadata VALUES (
     datetime('now'),
-    $RETENTION_DAYS,
-    '$CUTOFF_DATE',
-    $CHECK_COUNT,
-    $ALERT_COUNT
+    ${RETENTION_DAYS},
+    datetime('now', '-${RETENTION_DAYS} days'),
+    ${CHECK_COUNT},
+    ${ALERT_COUNT}
 );
 
 -- Copy old records to archive
 INSERT INTO archive.check_history
 SELECT * FROM main.check_history
-WHERE timestamp < '$CUTOFF_DATE';
+WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');
 
 INSERT INTO archive.alert_log
 SELECT * FROM main.alert_log
-WHERE timestamp < '$CUTOFF_DATE';
+WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');
 
 -- Detach archive database
 DETACH DATABASE archive;
@@ -202,9 +209,9 @@ fi
 log_info "Removing archived records from main database..."
 
 sqlite3 "$DB_PATH" <<EOF
--- Delete old records
-DELETE FROM check_history WHERE timestamp < '$CUTOFF_DATE';
-DELETE FROM alert_log WHERE timestamp < '$CUTOFF_DATE';
+-- Delete old records (RETENTION_DAYS is validated as positive integer)
+DELETE FROM check_history WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');
+DELETE FROM alert_log WHERE timestamp < datetime('now', '-${RETENTION_DAYS} days');
 
 -- Optimize database
 VACUUM;
