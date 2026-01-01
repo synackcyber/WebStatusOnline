@@ -1,7 +1,7 @@
 {
   "library_version": "1.0",
-  "default_down_alert": "system_down.aiff",
-  "default_up_alert": "system_up.aiff",
+  "default_down_alert": "PromptServiceRequired_beep.wav",
+  "default_up_alert": "AllSystemsFunctioning.wav",
   "categories": {
     "beeps": {
       "name": "Beeps & Tones",
@@ -21,7 +21,10 @@
     "professional": {
       "name": "Professional Alerts",
       "description": "High-quality professional alert sounds",
-      "alerts": []
+      "alerts": [
+        "PromptServiceRequired_beep.wav",
+        "AllSystemsFunctioning.wav"
+      ]
     }
   },
   "alerts": {
@@ -36,7 +39,8 @@
       ],
       "description": "Default system down alert",
       "duration_ms": 1000,
-      "volume_level": "medium"
+      "volume_level": "medium",
+      "web_path": "system_down.aiff"
     },
     "system_up.aiff": {
       "id": "system_up",
@@ -49,7 +53,36 @@
       ],
       "description": "Default system recovered alert",
       "duration_ms": 1000,
-      "volume_level": "medium"
+      "volume_level": "medium",
+      "web_path": "system_up.aiff"
+    },
+    "promptservicerequired-beep.wav": {
+      "id": "promptservicerequired-beep.wav",
+      "name": "Promptservicerequired-Beep.Wav",
+      "filename": "PromptServiceRequired_beep.wav",
+      "category": "professional",
+      "event_types": [
+        "down",
+        "threshold_reached"
+      ],
+      "description": "Custom professional alert",
+      "duration_ms": 1000,
+      "volume_level": "medium",
+      "web_path": "library/professional/PromptServiceRequired_beep.wav"
+    },
+    "allsystemsfunctioning.wav": {
+      "id": "allsystemsfunctioning.wav",
+      "name": "Allsystemsfunctioning.Wav",
+      "filename": "AllSystemsFunctioning.wav",
+      "category": "professional",
+      "event_types": [
+        "down",
+        "threshold_reached"
+      ],
+      "description": "Custom professional alert",
+      "duration_ms": 1000,
+      "volume_level": "medium",
+      "web_path": "library/professional/AllSystemsFunctioning.wav"
     }
   },
   "event_type_mappings": {

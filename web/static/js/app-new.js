@@ -753,22 +753,11 @@ class WebStatusApp {
                 grid.innerHTML = this.createSkeletonGrid(6);
             }
 
-            // Fetch uptime metrics for each target
-            const targetsWithUptime = await Promise.all(
-                targets.map(async (target) => {
-                    try {
-                        const uptime = await this.apiGet(`/targets/${target.id}/uptime`);
-                        return { ...target, uptime };
-                    } catch (error) {
-                        console.error(`Failed to load uptime for ${target.name}:`, error);
-                        return target; // Return without uptime if it fails
-                    }
-                })
-            );
-
-            this.renderCompactTargets(targetsWithUptime);
+            // Uptime metrics are now included in the /targets response
+            // No need for separate API calls - this improves performance significantly
+            this.renderCompactTargets(targets);
             this.updateSystemStatus(status);
-            this.updateAlertIndicator(targetsWithUptime);
+            this.updateAlertIndicator(targets);
         } catch (error) {
             console.error('Failed to load dashboard:', error);
             if (grid) {

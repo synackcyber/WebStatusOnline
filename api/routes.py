@@ -192,7 +192,7 @@ async def get_targets():
     # Cache miss - fetch from database
     targets = await db.get_all_targets()
 
-    # Enhance each target with current uptime/downtime duration
+    # Enhance each target with current uptime/downtime duration and metrics
     for target in targets:
         current_duration, formatted = calculate_current_duration(
             target.get('last_status_change'),
@@ -216,8 +216,28 @@ async def get_targets():
             target['current_downtime'] = 0
             target['current_downtime_formatted'] = "0s"
 
-        # Calculate overall uptime percentage
-        target['uptime_percentage'] = calculate_uptime_percentage(
+        # Get industry-standard uptime metrics from check history (24h, 7d, 30d)
+        uptime_metrics = await db.get_uptime_metrics(target['id'])
+
+        # Add uptime metrics object for frontend
+        target['uptime'] = {
+            'uptime_24h': uptime_metrics.get('uptime_24h', 100),
+            'uptime_7d': uptime_metrics.get('uptime_7d', 100),
+            'uptime_30d': uptime_metrics.get('uptime_30d', 100),
+            'checks_24h': uptime_metrics.get('checks_24h', 0),
+            'checks_7d': uptime_metrics.get('checks_7d', 0),
+            'checks_30d': uptime_metrics.get('checks_30d', 0),
+            'up_checks_24h': uptime_metrics.get('up_checks_24h', 0),
+            'up_checks_7d': uptime_metrics.get('up_checks_7d', 0),
+            'up_checks_30d': uptime_metrics.get('up_checks_30d', 0),
+            'current_duration_formatted': formatted
+        }
+
+        # Primary percentage shown on dashboard (24h)
+        target['uptime_percentage'] = uptime_metrics.get('uptime_24h', 100)
+
+        # Keep all-time percentage available as well
+        target['uptime_percentage_alltime'] = calculate_uptime_percentage(
             target.get('total_uptime', 0),
             target.get('total_downtime', 0),
             current_duration,

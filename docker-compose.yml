@@ -16,8 +16,8 @@ services:
       - ./logs:/app/logs
       # Persist configuration
       - ./config.json:/app/config.json
-      # Persist custom sounds
-      - ./sounds/custom:/app/sounds/custom
+      # Persist sounds (includes custom uploads, library, and system sounds)
+      - ./sounds:/app/sounds
     environment:
       - TZ=America/New_York  # Change to your timezone
       - PYTHONUNBUFFERED=1
