@@ -2922,6 +2922,7 @@ class WebStatusApp {
             alertEntries.forEach(([id, alert]) => {
                 const isDefault = alert.filename === library.default_down_alert || alert.filename === library.default_up_alert;
                 const defaultBadge = isDefault ? '<span class="default-badge">Default</span>' : '';
+                const webPath = alert.web_path || alert.filename; // Use web_path if available
 
                 html += `
                     <div class="audio-alert-card" data-filename="${alert.filename}">
@@ -2931,7 +2932,7 @@ class WebStatusApp {
                             ${alert.description ? `<div class="audio-alert-description">${alert.description}</div>` : ''}
                         </div>
                         <div class="audio-alert-actions">
-                            <button type="button" class="btn btn-small btn-secondary play-audio-btn" data-filename="${alert.filename}">
+                            <button type="button" class="btn btn-small btn-secondary play-audio-btn" data-web-path="${webPath}">
                                 <span class="icon-play"></span> Play
                             </button>
                             ${alert.category !== 'default' ? `<button type="button" class="btn btn-small btn-danger delete-audio-btn" data-id="${id}">Delete</button>` : ''}
@@ -2946,8 +2947,8 @@ class WebStatusApp {
             // Add event listeners
             container.querySelectorAll('.play-audio-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const filename = e.currentTarget.dataset.filename;
-                    this.previewAudio(filename);
+                    const webPath = e.currentTarget.dataset.webPath;
+                    this.previewAudio(webPath);
                 });
             });
 

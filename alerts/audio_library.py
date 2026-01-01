@@ -95,6 +95,23 @@ class AudioLibrary:
         logger.warning(f"Audio file not found: {filename}")
         return None
 
+    def get_web_path(self, filename: str) -> str:
+        """Get web-accessible path for audio file (relative to /sounds/ endpoint)"""
+        # Check if it's in the root sounds directory
+        root_path = self.sounds_dir / filename
+        if root_path.exists():
+            return filename
+
+        # Check in library subdirectories
+        for category in ["beeps", "tones", "vocal", "professional"]:
+            category_path = self.sounds_dir / "library" / category / filename
+            if category_path.exists():
+                return f"library/{category}/{filename}"
+
+        # If not found, return filename as-is (will likely fail but maintains backwards compatibility)
+        logger.warning(f"Audio file not found for web path: {filename}")
+        return filename
+
     def get_default_alert(self, event_type: str) -> str:
         """Get default alert filename for an event type"""
         event_mappings = self.library_data.get("event_type_mappings", {})

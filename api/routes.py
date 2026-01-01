@@ -1152,8 +1152,15 @@ async def import_discovered_devices(devices: List[Dict]):
 async def get_audio_library():
     """Get the complete audio alert library."""
     from alerts.audio_library import audio_library
+
+    # Add web_path to each alert for frontend use
+    alerts = audio_library.get_all_alerts()
+    for alert_id, alert_data in alerts.items():
+        filename = alert_data.get("filename", "")
+        alert_data["web_path"] = audio_library.get_web_path(filename)
+
     return {
-        "alerts": audio_library.get_all_alerts(),
+        "alerts": alerts,
         "categories": audio_library.get_categories(),
         "stats": audio_library.get_library_stats(),
         "default_down_alert": audio_library.library_data.get("default_down_alert", "system_down.aiff"),
@@ -1190,9 +1197,16 @@ async def update_default_alerts(defaults: Dict[str, Any]):
 async def get_audio_by_category(category: str):
     """Get audio alerts filtered by category."""
     from alerts.audio_library import audio_library
+
+    # Add web_path to each alert
+    alerts = audio_library.get_alerts_by_category(category)
+    for alert_id, alert_data in alerts.items():
+        filename = alert_data.get("filename", "")
+        alert_data["web_path"] = audio_library.get_web_path(filename)
+
     return {
         "category": category,
-        "alerts": audio_library.get_alerts_by_category(category)
+        "alerts": alerts
     }
 
 
@@ -1200,9 +1214,16 @@ async def get_audio_by_category(category: str):
 async def get_audio_by_event_type(event_type: str):
     """Get audio alerts suitable for a specific event type."""
     from alerts.audio_library import audio_library
+
+    # Add web_path to each alert
+    alerts = audio_library.get_alerts_by_event_type(event_type)
+    for alert_data in alerts:
+        filename = alert_data.get("filename", "")
+        alert_data["web_path"] = audio_library.get_web_path(filename)
+
     return {
         "event_type": event_type,
-        "alerts": audio_library.get_alerts_by_event_type(event_type)
+        "alerts": alerts
     }
 
 

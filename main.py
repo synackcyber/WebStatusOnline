@@ -202,11 +202,14 @@ async def start_alert_for_target(target: Dict):
     if not custom_audio:
         custom_audio = 'system_down.mp3'  # Fallback
 
+    # Convert filename to web-accessible path
+    web_audio_path = audio_library.get_web_path(custom_audio)
+
     # Update alert state for client polling
     await alert_state.set_alert(
         target_id=target_id,
         target_name=target_name,
-        audio_file=custom_audio,
+        audio_file=web_audio_path,
         interval_seconds=interval
     )
 
@@ -373,10 +376,13 @@ async def handle_alert_event(event: AlertEvent):
             if not audio_file:
                 audio_file = 'system_up.mp3'  # Fallback
 
+            # Convert filename to web-accessible path
+            web_audio_path = audio_library.get_web_path(audio_file)
+
             await alert_state.set_recovery(
                 target_id=event.target_id,
                 target_name=event.target_name,
-                audio_file=audio_file
+                audio_file=web_audio_path
             )
 
         # Send recovery webhook and clear state
