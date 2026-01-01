@@ -275,12 +275,22 @@ async def get_target_uptime(target_id: str):
 @router.post("/targets", response_model=Target, status_code=status.HTTP_201_CREATED)
 async def create_target(target_data: TargetCreate):
     """Create a new monitoring target."""
+    from alerts.audio_library import audio_library
+
     # Create target with new ID
     target_dict = target_data.dict()
     target_dict['id'] = str(uuid.uuid4())
 
     # Validate address format based on target type
     validate_target_address(target_dict['type'], target_dict['address'])
+
+    # SECURITY: Validate audio alert filenames if specified
+    if target_dict.get('audio_down_alert'):
+        if not audio_library.get_alert_path(target_dict['audio_down_alert']):
+            raise HTTPException(status_code=400, detail="Invalid audio_down_alert filename")
+    if target_dict.get('audio_up_alert'):
+        if not audio_library.get_alert_path(target_dict['audio_up_alert']):
+            raise HTTPException(status_code=400, detail="Invalid audio_up_alert filename")
 
     # Use global config defaults if not specified
     if target_dict.get('check_interval') is None:
@@ -305,6 +315,8 @@ async def create_target(target_data: TargetCreate):
 @router.put("/targets/{target_id}", response_model=Target)
 async def update_target(target_id: str, target_data: TargetUpdate):
     """Update a monitoring target."""
+    from alerts.audio_library import audio_library
+
     # Check if target exists
     existing = await db.get_target(target_id)
     if not existing:
@@ -318,6 +330,14 @@ async def update_target(target_id: str, target_data: TargetUpdate):
         target_type = updates.get('type', existing['type'])
         address = updates.get('address', existing['address'])
         validate_target_address(target_type, address)
+
+    # SECURITY: Validate audio alert filenames if being updated
+    if updates.get('audio_down_alert'):
+        if not audio_library.get_alert_path(updates['audio_down_alert']):
+            raise HTTPException(status_code=400, detail="Invalid audio_down_alert filename")
+    if updates.get('audio_up_alert'):
+        if not audio_library.get_alert_path(updates['audio_up_alert']):
+            raise HTTPException(status_code=400, detail="Invalid audio_up_alert filename")
 
     if updates:
         await db.update_target(target_id, updates)
@@ -1179,7 +1199,13 @@ async def update_default_alerts(defaults: Dict[str, Any]):
     if not default_down or not default_up:
         raise HTTPException(status_code=400, detail="Both default_down_alert and default_up_alert are required")
 
-    # Update library data
+    # SECURITY: Validate that both files actually exist in the library
+    if not audio_library.get_alert_path(default_down):
+        raise HTTPException(status_code=400, detail=f"Invalid down alert filename: {default_down[:50]}")
+    if not audio_library.get_alert_path(default_up):
+        raise HTTPException(status_code=400, detail=f"Invalid up alert filename: {default_up[:50]}")
+
+    # Update library data with validated filenames
     audio_library.library_data["default_down_alert"] = default_down
     audio_library.library_data["default_up_alert"] = default_up
 

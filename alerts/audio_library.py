@@ -79,38 +79,86 @@ class AudioLibrary:
         """Get specific alert by ID"""
         return self.library_data.get("alerts", {}).get(alert_id)
 
+    def _sanitize_audio_filename(self, filename: str) -> str:
+        """Sanitize filename to prevent path traversal attacks."""
+        if not filename:
+            return ""
+
+        # Get just the basename (removes directory components)
+        safe_name = Path(filename).name
+
+        # Remove any remaining path separators or traversal patterns
+        safe_name = safe_name.replace('..', '').replace('/', '').replace('\\', '')
+
+        # Validate against allowed extensions
+        allowed_extensions = {'.aiff', '.wav', '.mp3', '.m4a', '.ogg'}
+        if not any(safe_name.lower().endswith(ext) for ext in allowed_extensions):
+            logger.warning(f"Audio filename has invalid extension: {filename[:50]}")
+            return ""
+
+        return safe_name
+
     def get_alert_path(self, filename: str) -> Optional[Path]:
-        """Get full path to audio file"""
+        """Get full path to audio file with security validation."""
+        # SECURITY: Sanitize filename first to prevent path traversal
+        safe_filename = self._sanitize_audio_filename(filename)
+        if not safe_filename:
+            return None
+
         # Check if it's in the root sounds directory
-        root_path = self.sounds_dir / filename
-        if root_path.exists():
-            return root_path
+        root_path = self.sounds_dir / safe_filename
+        try:
+            # Resolve to canonical path and verify it's within allowed directory
+            resolved_root = root_path.resolve()
+            if resolved_root.is_relative_to(self.sounds_dir.resolve()) and resolved_root.exists():
+                return resolved_root
+        except (ValueError, OSError):
+            pass
 
         # Check in library subdirectories
         for category in ["beeps", "tones", "vocal", "professional"]:
-            category_path = self.sounds_dir / "library" / category / filename
-            if category_path.exists():
-                return category_path
+            category_path = self.sounds_dir / "library" / category / safe_filename
+            try:
+                resolved_category = category_path.resolve()
+                if resolved_category.is_relative_to(self.sounds_dir.resolve()) and resolved_category.exists():
+                    return resolved_category
+            except (ValueError, OSError):
+                continue
 
-        logger.warning(f"Audio file not found: {filename}")
+        logger.warning(f"Audio file not found: {safe_filename}")
         return None
 
     def get_web_path(self, filename: str) -> str:
         """Get web-accessible path for audio file (relative to /sounds/ endpoint)"""
+        # SECURITY: Sanitize filename first to prevent path traversal
+        safe_filename = self._sanitize_audio_filename(filename)
+        if not safe_filename:
+            logger.warning(f"Invalid audio filename rejected: {filename[:50]}")
+            # Safe fallback to default
+            return self.library_data.get("default_down_alert", "system_down.aiff")
+
         # Check if it's in the root sounds directory
-        root_path = self.sounds_dir / filename
-        if root_path.exists():
-            return filename
+        root_path = self.sounds_dir / safe_filename
+        try:
+            resolved_root = root_path.resolve()
+            if resolved_root.is_relative_to(self.sounds_dir.resolve()) and resolved_root.exists():
+                return safe_filename
+        except (ValueError, OSError):
+            pass
 
         # Check in library subdirectories
         for category in ["beeps", "tones", "vocal", "professional"]:
-            category_path = self.sounds_dir / "library" / category / filename
-            if category_path.exists():
-                return f"library/{category}/{filename}"
+            category_path = self.sounds_dir / "library" / category / safe_filename
+            try:
+                resolved_category = category_path.resolve()
+                if resolved_category.is_relative_to(self.sounds_dir.resolve()) and resolved_category.exists():
+                    return f"library/{category}/{safe_filename}"
+            except (ValueError, OSError):
+                continue
 
-        # If not found, return filename as-is (will likely fail but maintains backwards compatibility)
-        logger.warning(f"Audio file not found for web path: {filename}")
-        return filename
+        # If not found, return safe default instead of potentially unsafe input
+        logger.warning(f"Audio file not found for web path: {safe_filename}")
+        return self.library_data.get("default_down_alert", "system_down.aiff")
 
     def get_default_alert(self, event_type: str) -> str:
         """Get default alert filename for an event type"""

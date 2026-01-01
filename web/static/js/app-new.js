@@ -2444,7 +2444,7 @@ class WebStatusApp {
 
         const mostAffectedEl = document.getElementById('summaryMostAffected');
         if (summary.most_affected_target) {
-            mostAffectedEl.innerHTML = `${summary.most_affected_target} <span class="incident-count-small">(${summary.most_affected_count} incidents)</span>`;
+            mostAffectedEl.innerHTML = `${this.escapeHtml(summary.most_affected_target)} <span class="incident-count-small">(${summary.most_affected_count} incidents)</span>`;
         } else {
             mostAffectedEl.textContent = '—';
         }
@@ -2756,8 +2756,8 @@ class WebStatusApp {
         });
 
         // Clear existing options and add "Use Default" with the actual default name
-        downSelect.innerHTML = `<option value="">Use Default (${defaultDownDisplayName})</option>`;
-        upSelect.innerHTML = `<option value="">Use Default (${defaultUpDisplayName})</option>`;
+        downSelect.innerHTML = `<option value="">Use Default (${this.escapeHtml(defaultDownDisplayName)})</option>`;
+        upSelect.innerHTML = `<option value="">Use Default (${this.escapeHtml(defaultUpDisplayName)})</option>`;
 
         // Add alerts
         Object.entries(alerts).forEach(([id, alert]) => {
@@ -2811,9 +2811,33 @@ class WebStatusApp {
     }
 
 
+    validateAudioPath(path) {
+        // Validate audio file path to prevent path traversal
+        if (!path) return '';
+
+        // Remove any path traversal attempts
+        const safePath = path.replace(/\.\./g, '').replace(/^\/+/, '');
+
+        // Ensure it has a valid audio extension
+        if (!/\.(mp3|wav|aiff|ogg|m4a)$/i.test(safePath)) {
+            console.warn('Invalid audio file extension:', path);
+            return '';
+        }
+
+        return safePath;
+    }
+
     previewAudio(filename) {
+        // SECURITY: Validate audio path
+        const safePath = this.validateAudioPath(filename);
+        if (!safePath) {
+            console.error('Invalid audio filename:', filename);
+            this.showToast('Invalid audio file', 'error');
+            return;
+        }
+
         // Create audio element and play
-        const audio = new Audio(`/sounds/${filename}`);
+        const audio = new Audio(`/sounds/${safePath}`);
         audio.play().catch(error => {
             console.error('Failed to play audio:', error);
             this.showToast('Failed to play audio', 'error');
