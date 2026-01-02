@@ -157,12 +157,14 @@ class WebStatusApp {
 
             this.loadSettings();
 
-            this.loadAudioLibrary();
+            // Load audio library BEFORE initializing audio system
+            // so we know which default sounds to pre-load
+            await this.loadAudioLibrary();
 
             this.loadDevicePresets();
 
             // Initialize audio system for browser autoplay compatibility
-            this.initializeAudioSystem();
+            await this.initializeAudioSystem();
 
             this.startAutoRefresh();
 
@@ -178,12 +180,24 @@ class WebStatusApp {
     // AUDIO SYSTEM MANAGEMENT
     // ========================================
 
-    initializeAudioSystem() {
+    async initializeAudioSystem() {
         console.log('🔊 Initializing audio system...');
 
-        // Pre-load common audio files
-        this.preloadAudioFile('system_down.aiff');
-        this.preloadAudioFile('system_up.aiff');
+        // Pre-load default audio files from the audio library configuration
+        // Fallback to system defaults if library is not loaded yet
+        const defaultDownSound = this.audioLibrary?.default_down_alert || 'system_down.aiff';
+        const defaultUpSound = this.audioLibrary?.default_up_alert || 'system_up.aiff';
+
+        this.preloadAudioFile(defaultDownSound);
+        this.preloadAudioFile(defaultUpSound);
+
+        // Also preload the hardcoded defaults as fallback (if different from configured defaults)
+        if (defaultDownSound !== 'system_down.aiff') {
+            this.preloadAudioFile('system_down.aiff');
+        }
+        if (defaultUpSound !== 'system_up.aiff') {
+            this.preloadAudioFile('system_up.aiff');
+        }
 
         // Set up user interaction handler to unlock audio
         this.setupAudioUnlockHandler();
@@ -199,20 +213,18 @@ class WebStatusApp {
             audio.volume = 1.0;
             audio.controls = false;  // Prevent browser from treating this as a media player
 
-            // Try multiple formats for browser compatibility
-            // Chrome doesn't support AIFF, so we'll try MP3 first, then AIFF for Safari
-            const baseName = filename.replace(/\.(aiff|mp3|wav|ogg)$/i, '');
-            const formats = ['mp3', 'aiff', 'wav'];
+            // Determine if this is a library file or a legacy /sounds/ file
+            let audioPath;
+            if (filename.startsWith('library/')) {
+                // Library files are already stored with full path
+                audioPath = `/sounds/${filename}`;
+            } else {
+                // Legacy system files in /sounds/ root
+                audioPath = `/sounds/${filename}`;
+            }
 
-            // Set up sources with fallbacks
-            formats.forEach(ext => {
-                const source = document.createElement('source');
-                source.src = `/sounds/${baseName}.${ext}`;
-                source.type = ext === 'mp3' ? 'audio/mpeg' :
-                             ext === 'aiff' ? 'audio/aiff' :
-                             ext === 'wav' ? 'audio/wav' : 'audio/ogg';
-                audio.appendChild(source);
-            });
+            // Set the source directly (the file should exist with the exact extension specified)
+            audio.src = audioPath;
 
             // Store the audio element
             this.audioElements[filename] = audio;
