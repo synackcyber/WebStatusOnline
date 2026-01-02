@@ -760,14 +760,21 @@ async def get_incidents(days: int = 14) -> Dict[str, Any]:
 
         for incident in incidents_list:
             started_at = datetime.fromisoformat(incident['started_at'].replace('Z', '+00:00'))
+            # Ensure started_at is timezone-aware in UTC
+            if started_at.tzinfo is None:
+                started_at = started_at.replace(tzinfo=timezone.utc)
 
             if incident['resolved_at']:
                 resolved_at = datetime.fromisoformat(incident['resolved_at'].replace('Z', '+00:00'))
+                # Ensure resolved_at is timezone-aware in UTC
+                if resolved_at.tzinfo is None:
+                    resolved_at = resolved_at.replace(tzinfo=timezone.utc)
                 duration_seconds = (resolved_at - started_at).total_seconds()
                 resolved_count += 1
             else:
-                # Still ongoing
-                duration_seconds = (datetime.now(timezone.utc).replace(tzinfo=started_at.tzinfo) - started_at).total_seconds()
+                # Still ongoing - use current UTC time
+                now_utc = datetime.now(timezone.utc)
+                duration_seconds = (now_utc - started_at).total_seconds()
                 incident['status'] = 'ongoing'
                 ongoing_count += 1
 

@@ -1,7 +1,7 @@
 {
   "library_version": "1.0",
-  "default_down_alert": "PromptServiceRequired_beep.wav",
-  "default_up_alert": "AllSystemsFunctioning.wav",
+  "default_down_alert": "library/professional/PromptServiceRequired_beep.wav",
+  "default_up_alert": "library/professional/AllSystemsFunctioning.wav",
   "categories": {
     "beeps": {
       "name": "Beeps & Tones",
@@ -22,8 +22,8 @@
       "name": "Professional Alerts",
       "description": "High-quality professional alert sounds",
       "alerts": [
-        "PromptServiceRequired_beep.wav",
-        "AllSystemsFunctioning.wav"
+        "library/professional/PromptServiceRequired_beep.wav",
+        "library/professional/AllSystemsFunctioning.wav"
       ]
     }
   },

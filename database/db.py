@@ -491,12 +491,14 @@ class Database:
     async def add_check_history(self, target_id: str, status: str,
                                response_time: Optional[float] = None,
                                error_message: Optional[str] = None):
-        """Add a check history entry."""
+        """Add a check history entry with UTC timestamp."""
         db = await self._get_connection()
+        # Explicitly set UTC timestamp instead of relying on CURRENT_TIMESTAMP
+        timestamp = utc_now()
         await db.execute("""
-            INSERT INTO check_history (target_id, status, response_time, error_message)
-            VALUES (?, ?, ?, ?)
-        """, (target_id, status, response_time, error_message))
+            INSERT INTO check_history (target_id, status, response_time, error_message, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        """, (target_id, status, response_time, error_message, timestamp))
         await db.commit()
 
     async def get_check_history(self, target_id: str, limit: int = 100) -> List[Dict]:
@@ -598,12 +600,14 @@ class Database:
 
     # Alert log operations
     async def add_alert_log(self, target_id: str, event_type: str, message: str):
-        """Add an alert log entry."""
+        """Add an alert log entry with UTC timestamp."""
         db = await self._get_connection()
+        # Explicitly set UTC timestamp instead of relying on CURRENT_TIMESTAMP
+        timestamp = utc_now()
         await db.execute("""
-            INSERT INTO alert_log (target_id, event_type, message)
-            VALUES (?, ?, ?)
-        """, (target_id, event_type, message))
+            INSERT INTO alert_log (target_id, event_type, message, timestamp)
+            VALUES (?, ?, ?, ?)
+        """, (target_id, event_type, message, timestamp))
         await db.commit()
 
     async def get_alert_log(self, target_id: Optional[str] = None,
