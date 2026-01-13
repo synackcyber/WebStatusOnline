@@ -1,7 +1,7 @@
 # Core Web Framework
 fastapi==0.115.6  # Updated from 0.103.2 - security fixes
 uvicorn[standard]==0.34.0  # Updated from 0.22.0 - performance and security improvements
-starlette==0.41.3  # Required by FastAPI - updated for compatibility
+starlette==0.49.1  # Required by FastAPI - updated for compatibility
 
 # HTTP Client
 httpx==0.28.1  # Updated from 0.24.1 - security fixes and HTTP/2 improvements
@@ -18,7 +18,7 @@ python-multipart==0.0.20  # Updated from 0.0.8 - form data handling
 croniter==5.0.1  # Updated from 2.0.0 - cron expression parsing
 
 # Security & Cryptography
-cryptography==44.0.0  # Updated from 41.0.3 - CRITICAL security updates
+cryptography==44.0.1  # Updated from 41.0.3 - CRITICAL security updates
 bcrypt==4.2.1  # Password hashing
 
 # Templating
